@@ -1,0 +1,25 @@
+data/
+out/
+.venv/
+node_modules/
+.next/
+__pycache__/
+.pytest_cache/
+*.pyc
+*.tsbuildinfo
+.env*
+.DS_Store
+*.log
+# Real footage and generated images must never enter history.
+*.mp4
+*.webm
+*.mov
+*.mkv
+*.avi
+*.jpg
+*.jpeg
+*.png
+*.webp
+*.pth
+*.pt
+*.onnx

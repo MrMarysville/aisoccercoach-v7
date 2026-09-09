@@ -1,0 +1,406 @@
+{
+  "created": "2026-09-09",
+  "purpose": "Selected active editor and calibration code only; no old documentation or Git history imported.",
+  "sources": [
+    {
+      "path": "web/package.json",
+      "source": "propagation worktree @ c537841 + working copy: v2/app/package.json",
+      "source_sha256": "ec43f69d8480236c3dc7f21d101d347f0ab0cb57b81d7612d9f53f1fea6ecad0",
+      "copied_sha256": "ec43f69d8480236c3dc7f21d101d347f0ab0cb57b81d7612d9f53f1fea6ecad0",
+      "migrated_sha256": "c53b49fda4b0f8a49cca15bf140f520dc6a2df7911584dedc89642aeb488a0fe"
+    },
+    {
+      "path": "web/tsconfig.json",
+      "source": "propagation worktree @ c537841 + working copy: v2/app/tsconfig.json",
+      "source_sha256": "bb1402ab7bcf48607e7b4d7db6aa2c5559ef7a2a9c99f2f71b5f63a3e39d8aa0",
+      "copied_sha256": "bb1402ab7bcf48607e7b4d7db6aa2c5559ef7a2a9c99f2f71b5f63a3e39d8aa0",
+      "migrated_sha256": "bb1402ab7bcf48607e7b4d7db6aa2c5559ef7a2a9c99f2f71b5f63a3e39d8aa0"
+    },
+    {
+      "path": "web/eslint.config.mjs",
+      "source": "propagation worktree @ c537841 + working copy: v2/app/eslint.config.mjs",
+      "source_sha256": "9057296eda401ab6da18b074f8f159d5c98e827d5f9699bdd36bb6f36c8b54ee",
+      "copied_sha256": "9057296eda401ab6da18b074f8f159d5c98e827d5f9699bdd36bb6f36c8b54ee",
+      "migrated_sha256": "9057296eda401ab6da18b074f8f159d5c98e827d5f9699bdd36bb6f36c8b54ee"
+    },
+    {
+      "path": "web/vitest.config.ts",
+      "source": "propagation worktree @ c537841 + working copy: v2/app/vitest.config.ts",
+      "source_sha256": "8738cb3a6573c12c203a617c175d9c92c075f1c7a17eab8bd4cd397aeb9048ef",
+      "copied_sha256": "8738cb3a6573c12c203a617c175d9c92c075f1c7a17eab8bd4cd397aeb9048ef",
+      "migrated_sha256": "8738cb3a6573c12c203a617c175d9c92c075f1c7a17eab8bd4cd397aeb9048ef"
+    },
+    {
+      "path": "web/next.config.ts",
+      "source": "propagation worktree @ c537841 + working copy: v2/app/next.config.ts",
+      "source_sha256": "1236ec6b62bd90a07ffd92b907373f857598bf6daef6843d8c0c81009baf829e",
+      "copied_sha256": "1236ec6b62bd90a07ffd92b907373f857598bf6daef6843d8c0c81009baf829e",
+      "migrated_sha256": "1941c69bb08d51d85087a014f0507e0d957e8be6969b1a183eccfe280b30277f"
+    },
+    {
+      "path": "web/app/layout.tsx",
+      "source": "propagation worktree @ c537841 + working copy: v2/app/app/layout.tsx",
+      "source_sha256": "e126fd660443c0c64c2e93c2c608c3df835349924804dd6322b1cd0bc7febc5b",
+      "copied_sha256": "e126fd660443c0c64c2e93c2c608c3df835349924804dd6322b1cd0bc7febc5b",
+      "migrated_sha256": "04dd76f09b7794757e179cb8f4540200a2b5df65b02f16681efdd71d9e23b9f5"
+    },
+    {
+      "path": "web/app/alignment/page.tsx",
+      "source": "propagation worktree @ c537841 + working copy: v2/app/app/alignment/page.tsx",
+      "source_sha256": "c1dba155ee81a13e8f4a495d6ab0db019d8acc52e34642ac35816d6c8f1b1a2a",
+      "copied_sha256": "c1dba155ee81a13e8f4a495d6ab0db019d8acc52e34642ac35816d6c8f1b1a2a",
+      "migrated_sha256": "c1dba155ee81a13e8f4a495d6ab0db019d8acc52e34642ac35816d6c8f1b1a2a"
+    },
+    {
+      "path": "web/app/alignment/AlignmentWorkspace.tsx",
+      "source": "propagation worktree @ c537841 + working copy: v2/app/app/alignment/AlignmentWorkspace.tsx",
+      "source_sha256": "4c17587e028ad9f16b72cd48c603ff11d884a8f83fd301aea7699751cac24e9e",
+      "copied_sha256": "4c17587e028ad9f16b72cd48c603ff11d884a8f83fd301aea7699751cac24e9e",
+      "migrated_sha256": "4c17587e028ad9f16b72cd48c603ff11d884a8f83fd301aea7699751cac24e9e"
+    },
+    {
+      "path": "web/app/alignment/alignment.module.css",
+      "source": "propagation worktree @ c537841 + working copy: v2/app/app/alignment/alignment.module.css",
+      "source_sha256": "d9994488f98e8557812240cbe0d8944ca00d0dec96bca3d91e026afc44c0f3ba",
+      "copied_sha256": "d9994488f98e8557812240cbe0d8944ca00d0dec96bca3d91e026afc44c0f3ba",
+      "migrated_sha256": "d9994488f98e8557812240cbe0d8944ca00d0dec96bca3d91e026afc44c0f3ba"
+    },
+    {
+      "path": "web/app/api/alignment/[id]/[resource]/route.ts",
+      "source": "propagation worktree @ c537841 + working copy: v2/app/app/api/alignment/[id]/[resource]/route.ts",
+      "source_sha256": "c73a0cc41d080a415840c4a0b933bc0e44ac875012b53b128590d7d84acc7bde",
+      "copied_sha256": "c73a0cc41d080a415840c4a0b933bc0e44ac875012b53b128590d7d84acc7bde",
+      "migrated_sha256": "c73a0cc41d080a415840c4a0b933bc0e44ac875012b53b128590d7d84acc7bde"
+    },
+    {
+      "path": "web/lib/alignment.ts",
+      "source": "propagation worktree @ c537841 + working copy: v2/app/lib/alignment.ts",
+      "source_sha256": "59676dd26f55e6b1907885d09169d886654bf61c67bde873b90f460c4ad6fd3f",
+      "copied_sha256": "59676dd26f55e6b1907885d09169d886654bf61c67bde873b90f460c4ad6fd3f",
+      "migrated_sha256": "59676dd26f55e6b1907885d09169d886654bf61c67bde873b90f460c4ad6fd3f"
+    },
+    {
+      "path": "web/lib/alignment-server.ts",
+      "source": "propagation worktree @ c537841 + working copy: v2/app/lib/alignment-server.ts",
+      "source_sha256": "86a18ee8eeca0edacfa2aeb51321a6cc757c777a7225bc18a854ea1ed36685f6",
+      "copied_sha256": "86a18ee8eeca0edacfa2aeb51321a6cc757c777a7225bc18a854ea1ed36685f6",
+      "migrated_sha256": "933a66e9646d8c12a5e3ae24e585fe8177e54423b00aadf3c42621f480cc8069"
+    },
+    {
+      "path": "web/lib/alignment-origin.ts",
+      "source": "propagation worktree @ c537841 + working copy: v2/app/lib/alignment-origin.ts",
+      "source_sha256": "b3356ca21ee1d175879e43b4cb39ccc0c0aeba9a8defcf85d0cc9aeee14ca881",
+      "copied_sha256": "b3356ca21ee1d175879e43b4cb39ccc0c0aeba9a8defcf85d0cc9aeee14ca881",
+      "migrated_sha256": "b3356ca21ee1d175879e43b4cb39ccc0c0aeba9a8defcf85d0cc9aeee14ca881"
+    },
+    {
+      "path": "web/lib/alignment.test.ts",
+      "source": "propagation worktree @ c537841 + working copy: v2/app/lib/alignment.test.ts",
+      "source_sha256": "2d7889922dc3ebc33907af64c5661c7ed77fab185300519a6c1219ef5cf28468",
+      "copied_sha256": "2d7889922dc3ebc33907af64c5661c7ed77fab185300519a6c1219ef5cf28468",
+      "migrated_sha256": "2d7889922dc3ebc33907af64c5661c7ed77fab185300519a6c1219ef5cf28468"
+    },
+    {
+      "path": "web/lib/alignment-origin.test.ts",
+      "source": "propagation worktree @ c537841 + working copy: v2/app/lib/alignment-origin.test.ts",
+      "source_sha256": "71bf531f61bf794eca250977f1b7aea75cdbc756308c9308fd1e2cc30bd7b908",
+      "copied_sha256": "71bf531f61bf794eca250977f1b7aea75cdbc756308c9308fd1e2cc30bd7b908",
+      "migrated_sha256": "71bf531f61bf794eca250977f1b7aea75cdbc756308c9308fd1e2cc30bd7b908"
+    },
+    {
+      "path": "web/components/AppShell.tsx",
+      "source": "propagation worktree @ c537841 + working copy: v2/app/components/AppShell.tsx",
+      "source_sha256": "57386bb007d3cad81c9a76db1c7413e3929abbb40d28273b288f8a3cc40dafcc",
+      "copied_sha256": "57386bb007d3cad81c9a76db1c7413e3929abbb40d28273b288f8a3cc40dafcc",
+      "migrated_sha256": "80566e1d239e4493a4e624116b8a5fd3d5fddc163b9247b61b05e717a3f5bcf1"
+    },
+    {
+      "path": "web/components/AppShell.module.css",
+      "source": "propagation worktree @ c537841 + working copy: v2/app/components/AppShell.module.css",
+      "source_sha256": "88313a13b407741c0eb3ff77fe4d0c6bc422cdfdbdcc625f16735f71b6d86375",
+      "copied_sha256": "88313a13b407741c0eb3ff77fe4d0c6bc422cdfdbdcc625f16735f71b6d86375",
+      "migrated_sha256": "88313a13b407741c0eb3ff77fe4d0c6bc422cdfdbdcc625f16735f71b6d86375"
+    },
+    {
+      "path": "web/styles/globals.css",
+      "source": "propagation worktree @ c537841 + working copy: v2/app/styles/globals.css",
+      "source_sha256": "b2ba03c13508768a926b0904734c046b1f3c10c4ab62ff4f3c2babd945abee0b",
+      "copied_sha256": "b2ba03c13508768a926b0904734c046b1f3c10c4ab62ff4f3c2babd945abee0b",
+      "migrated_sha256": "b2ba03c13508768a926b0904734c046b1f3c10c4ab62ff4f3c2babd945abee0b"
+    },
+    {
+      "path": "web/styles/tokens.css",
+      "source": "propagation worktree @ c537841 + working copy: v2/app/styles/tokens.css",
+      "source_sha256": "39299e3337d6a2ba9586d977a013ef17fff18fccef26602da6bc79751d4e3769",
+      "copied_sha256": "39299e3337d6a2ba9586d977a013ef17fff18fccef26602da6bc79751d4e3769",
+      "migrated_sha256": "39299e3337d6a2ba9586d977a013ef17fff18fccef26602da6bc79751d4e3769"
+    },
+    {
+      "path": "calibration/alignment_trial.py",
+      "source": "propagation worktree @ c537841 + working copy: v2/alignment_trial.py",
+      "source_sha256": "7e2f19afb8c9d1bd3394fc9440ca94c077aafa25fcfa9a4403f84ca8049a1342",
+      "copied_sha256": "7e2f19afb8c9d1bd3394fc9440ca94c077aafa25fcfa9a4403f84ca8049a1342",
+      "migrated_sha256": "7e2f19afb8c9d1bd3394fc9440ca94c077aafa25fcfa9a4403f84ca8049a1342"
+    },
+    {
+      "path": "calibration/field_atlas.py",
+      "source": "propagation worktree @ c537841 + working copy: v2/field_atlas.py",
+      "source_sha256": "71c902cedceaeabad39fbfed4e5184e58612114ff1108240710cbe6ca7d7ce2d",
+      "copied_sha256": "71c902cedceaeabad39fbfed4e5184e58612114ff1108240710cbe6ca7d7ce2d",
+      "migrated_sha256": "71c902cedceaeabad39fbfed4e5184e58612114ff1108240710cbe6ca7d7ce2d"
+    },
+    {
+      "path": "calibration/field_adjustment.py",
+      "source": "propagation worktree @ c537841 + working copy: v2/field_adjustment.py",
+      "source_sha256": "7eccaf35f69a06906fc1dc34f8c842219e166fcb544ab3384885bb00d3bc8916",
+      "copied_sha256": "de2f364cfa379dfca6c1d955e3a8d0fd34bba1103e85f47e0394540f4fe65ea9",
+      "migrated_sha256": "de2f364cfa379dfca6c1d955e3a8d0fd34bba1103e85f47e0394540f4fe65ea9"
+    },
+    {
+      "path": "calibration/field_marking_check.py",
+      "source": "propagation worktree @ c537841 + working copy: v2/field_marking_check.py",
+      "source_sha256": "b77bd258b58dd0d3925f53a9dce55ed0450f00bb0fd9c26b1f2796ca226d8ef5",
+      "copied_sha256": "35a6f471e8f14ffde4eb1e082c7d73ca8ff31de6cc0f89892f51a8fccbea5fe5",
+      "migrated_sha256": "35a6f471e8f14ffde4eb1e082c7d73ca8ff31de6cc0f89892f51a8fccbea5fe5"
+    },
+    {
+      "path": "calibration/tools/field_adjustment.py",
+      "source": "propagation worktree @ c537841 + working copy: v2/tools/field_adjustment.py",
+      "source_sha256": "a7ea0b8e34d76d44d7b88d2d4b7bea375c9b0c7f2ca517af9cf1f7cdf72a76c7",
+      "copied_sha256": "8ff423a25fb7cfcddc4893f7efa368556d3c5bc8b16447a55f6ca9edc957ba1e",
+      "migrated_sha256": "8ff423a25fb7cfcddc4893f7efa368556d3c5bc8b16447a55f6ca9edc957ba1e"
+    },
+    {
+      "path": "calibration/tools/fit_field_recovery.py",
+      "source": "propagation worktree @ c537841 + working copy: v2/tools/fit_field_recovery.py",
+      "source_sha256": "93902be0e563d3606e63848b0cb0ca8fa831473497a4cdc515ac447b716eafb9",
+      "copied_sha256": "d0358e5fa8aa49d753764fb59d67bad7fd7173e95e8a877a6241bfa8841a2528",
+      "migrated_sha256": "d0358e5fa8aa49d753764fb59d67bad7fd7173e95e8a877a6241bfa8841a2528"
+    },
+    {
+      "path": "calibration/tools/refine_field_recovery.py",
+      "source": "propagation worktree @ c537841 + working copy: v2/tools/refine_field_recovery.py",
+      "source_sha256": "2b58436995dc12fd67aa7c191e2f25d3b311689dcd531b72b0e31378f16a7982",
+      "copied_sha256": "939c8823b6c7380ada66163dfef3101c88d1d314855039b010731fb0ff09a0a3",
+      "migrated_sha256": "939c8823b6c7380ada66163dfef3101c88d1d314855039b010731fb0ff09a0a3"
+    },
+    {
+      "path": "calibration/tools/refine_near_field_recovery.py",
+      "source": "propagation worktree @ c537841 + working copy: v2/tools/refine_near_field_recovery.py",
+      "source_sha256": "8bd738bbdda4b9c60ca3ebc0465f9cf9ebb0f3708684d877e61c6d2e2863e015",
+      "copied_sha256": "8bd738bbdda4b9c60ca3ebc0465f9cf9ebb0f3708684d877e61c6d2e2863e015",
+      "migrated_sha256": "8bd738bbdda4b9c60ca3ebc0465f9cf9ebb0f3708684d877e61c6d2e2863e015"
+    },
+    {
+      "path": "calibration/tools/score_field_recovery.py",
+      "source": "propagation worktree @ c537841 + working copy: v2/tools/score_field_recovery.py",
+      "source_sha256": "29ae151e9ad4d2b4db88a4bb736f5f755b842744bc84d1667f6e416534017109",
+      "copied_sha256": "8eb3cc9337db3ce37aeda43fc07c02bc8a4ab3b81e51eacac7e75b50b554a892",
+      "migrated_sha256": "8eb3cc9337db3ce37aeda43fc07c02bc8a4ab3b81e51eacac7e75b50b554a892"
+    },
+    {
+      "path": "calibration/tools/diagnose_field_recovery.py",
+      "source": "propagation worktree @ c537841 + working copy: v2/tools/diagnose_field_recovery.py",
+      "source_sha256": "f6bf17b10a5fcf7b004f9b27f938722858fea3b12820ad99e5fb69dda215981d",
+      "copied_sha256": "51e98fa90c502af92b5183ee9ac7d7cf73826595fc18456adc68c55367033fa9",
+      "migrated_sha256": "51e98fa90c502af92b5183ee9ac7d7cf73826595fc18456adc68c55367033fa9"
+    },
+    {
+      "path": "calibration/tools/assemble_field_recovery.py",
+      "source": "propagation worktree @ c537841 + working copy: v2/tools/assemble_field_recovery.py",
+      "source_sha256": "060228d2ff02864974cbe665595963af84f52d4dbf50b54775ae85e4442dcce6",
+      "copied_sha256": "6fee35f283f0b71ae6e03bbe0b9244e2bec3f3171a5efc946759b9360aeb000f",
+      "migrated_sha256": "6fee35f283f0b71ae6e03bbe0b9244e2bec3f3171a5efc946759b9360aeb000f"
+    },
+    {
+      "path": "calibration/tools/prepare_field_recovery.py",
+      "source": "propagation worktree @ c537841 + working copy: v2/tools/prepare_field_recovery.py",
+      "source_sha256": "4df29bccb1ba188d346a73c572c23f79eb911bc84118952077cf61ea18233271",
+      "copied_sha256": "10c9d20afe838232f6a2482a06777dbe715aac87b1b23f1f4046feb6fe5f0ad1",
+      "migrated_sha256": "10c9d20afe838232f6a2482a06777dbe715aac87b1b23f1f4046feb6fe5f0ad1"
+    },
+    {
+      "path": "calibration/tools/measure_field_annotations.py",
+      "source": "propagation worktree @ c537841 + working copy: v2/tools/measure_field_annotations.py",
+      "source_sha256": "9568eaeff5263c1412ace56ef215eba1fcfb090ecf26dc5f16621018893fda30",
+      "copied_sha256": "fe157511c44a2903ba0e4e66796d14955fff98095ddbda76eb3611498f5b5a96",
+      "migrated_sha256": "fe157511c44a2903ba0e4e66796d14955fff98095ddbda76eb3611498f5b5a96"
+    },
+    {
+      "path": "calibration/tools/field_annotation_server.py",
+      "source": "propagation worktree @ c537841 + working copy: v2/tools/field_annotation_server.py",
+      "source_sha256": "906607a62d43833649173166747918654cf4bfab112f5785b8ff3f936fb7b755",
+      "copied_sha256": "906607a62d43833649173166747918654cf4bfab112f5785b8ff3f936fb7b755",
+      "migrated_sha256": "906607a62d43833649173166747918654cf4bfab112f5785b8ff3f936fb7b755"
+    },
+    {
+      "path": "calibration/tools/field_annotation_viewer.html",
+      "source": "propagation worktree @ c537841 + working copy: v2/tools/field_annotation_viewer.html",
+      "source_sha256": "6bfeeca23bf5e259fbadd3af94cab2c3f0cb7d675fa3aba4f7b081240122fbdf",
+      "copied_sha256": "6bfeeca23bf5e259fbadd3af94cab2c3f0cb7d675fa3aba4f7b081240122fbdf",
+      "migrated_sha256": "6bfeeca23bf5e259fbadd3af94cab2c3f0cb7d675fa3aba4f7b081240122fbdf"
+    },
+    {
+      "path": "calibration/tools/game_sources.py",
+      "source": "propagation worktree @ c537841 + working copy: v2/tools/game_sources.py",
+      "source_sha256": "f9ca3db3f99e54be99747019b0181daf58795a5cd8344ad1dfa0d8904b60e80a",
+      "copied_sha256": "f9ca3db3f99e54be99747019b0181daf58795a5cd8344ad1dfa0d8904b60e80a",
+      "migrated_sha256": "5667de59ba72aae36ce07855f7fd730eed614fdb6aa5384211ea9fb361360b05"
+    },
+    {
+      "path": "calibration/tools/package_field_atlas.py",
+      "source": "propagation worktree @ c537841 + working copy: v2/tools/package_field_atlas.py",
+      "source_sha256": "7bffd4de2e2e3ce04e0ec62c3228383f72d25260580f762e067f1a82faf9daea",
+      "copied_sha256": "2dc070e62856f8b79b01a02e5ebcaa77e2e02b3da2cb717d5d579b0d7cbadf26",
+      "migrated_sha256": "2dc070e62856f8b79b01a02e5ebcaa77e2e02b3da2cb717d5d579b0d7cbadf26"
+    },
+    {
+      "path": "calibration/tools/locate_field_atlas.py",
+      "source": "propagation worktree @ c537841 + working copy: v2/tools/locate_field_atlas.py",
+      "source_sha256": "6db713eb69ff240eecc5e01a2a1e038afd1988f279d305f1d1a1182e7f797dee",
+      "copied_sha256": "a538bfc294d8a0faacdbe9550522718725da8d57a2464573405e31c5c289318f",
+      "migrated_sha256": "a538bfc294d8a0faacdbe9550522718725da8d57a2464573405e31c5c289318f"
+    },
+    {
+      "path": "calibration/tools/propagate_field_recovery.py",
+      "source": "propagation worktree @ c537841 + working copy: v2/tools/propagate_field_recovery.py",
+      "source_sha256": "e4a10b3438d804f4d01b3d1fd6589e8e7c03091aefc9bf48ddf1b8b038f77a20",
+      "copied_sha256": "a9dc36d70ff24d73c3da3719b52923d292acd8ccf6b866598ce5318a6d09d683",
+      "migrated_sha256": "a9dc36d70ff24d73c3da3719b52923d292acd8ccf6b866598ce5318a6d09d683"
+    },
+    {
+      "path": "calibration/tests/test_field_adjustment.py",
+      "source": "propagation worktree @ c537841 + working copy: v2/tests/test_field_adjustment.py",
+      "source_sha256": "5aacbd2027a5d0c425e137ec8d2fb3e3768c212b8e8f701ccd7d811342da9b12",
+      "copied_sha256": "c64c32e872afc3864e535299b936b0eee010a30deda47e5464ce1f53810ae6ae",
+      "migrated_sha256": "4f8ecb54ce8e5afedacf104bdec43f119e306b985ebfe66a3ef6a8acc55b477f"
+    },
+    {
+      "path": "calibration/tests/test_field_annotation.py",
+      "source": "propagation worktree @ c537841 + working copy: v2/tests/test_field_annotation.py",
+      "source_sha256": "7f505ed202a774e1b4f78a64751eceb2b94c770c3edcb11b6f7d90620b1666d9",
+      "copied_sha256": "7f505ed202a774e1b4f78a64751eceb2b94c770c3edcb11b6f7d90620b1666d9",
+      "migrated_sha256": "7f505ed202a774e1b4f78a64751eceb2b94c770c3edcb11b6f7d90620b1666d9"
+    },
+    {
+      "path": "calibration/tests/test_field_atlas.py",
+      "source": "propagation worktree @ c537841 + working copy: v2/tests/test_field_atlas.py",
+      "source_sha256": "a0576d76c4e416acf7d8537b62fedfbb4c142de852be458414fd3d1191bc352e",
+      "copied_sha256": "1456f1fcdb2369a914ff3fd82cdb34f53fc50554b67678d602f73eec49a61f63",
+      "migrated_sha256": "1456f1fcdb2369a914ff3fd82cdb34f53fc50554b67678d602f73eec49a61f63"
+    },
+    {
+      "path": "calibration/tests/test_field_marking_check.py",
+      "source": "propagation worktree @ c537841 + working copy: v2/tests/test_field_marking_check.py",
+      "source_sha256": "4304c3a8cc02e1339c8b2d8c5786781401be9541e25ea094b866684ce10633d5",
+      "copied_sha256": "c3c99608e96b4a24ecff908db83a899c3b93a2b3fd2abe4604ab4c7a9687ee97",
+      "migrated_sha256": "c3c99608e96b4a24ecff908db83a899c3b93a2b3fd2abe4604ab4c7a9687ee97"
+    },
+    {
+      "path": "calibration/tests/test_field_paint_measurement.py",
+      "source": "propagation worktree @ c537841 + working copy: v2/tests/test_field_paint_measurement.py",
+      "source_sha256": "9609ca3ab863ca71ceea79ee5a02cd4b3998bd5167490c4cddf37e6b65eabe4f",
+      "copied_sha256": "f07ac14548893cee31e1e53a47951c712735d47406b37a7dbe8b9da0a59578c9",
+      "migrated_sha256": "f07ac14548893cee31e1e53a47951c712735d47406b37a7dbe8b9da0a59578c9"
+    },
+    {
+      "path": "calibration/tests/test_field_paint_turf_profile.py",
+      "source": "propagation worktree @ c537841 + working copy: v2/tests/test_field_paint_turf_profile.py",
+      "source_sha256": "d07a03e93173ef50da32b746f0701ec59d47539d2a4250eab57a5f670946ecd3",
+      "copied_sha256": "e280ecabe987400337ebd2be8e0906f39454f6334d7d7e382ca1c6db79659e68",
+      "migrated_sha256": "e280ecabe987400337ebd2be8e0906f39454f6334d7d7e382ca1c6db79659e68"
+    },
+    {
+      "path": "calibration/tests/test_field_recovery.py",
+      "source": "propagation worktree @ c537841 + working copy: v2/tests/test_field_recovery.py",
+      "source_sha256": "e14618d3cb9dcec3b6fac7841e9b031167bc6684279409a8c8c278563613659e",
+      "copied_sha256": "e14618d3cb9dcec3b6fac7841e9b031167bc6684279409a8c8c278563613659e",
+      "migrated_sha256": "e14618d3cb9dcec3b6fac7841e9b031167bc6684279409a8c8c278563613659e"
+    },
+    {
+      "path": "calibration/tests/test_field_recovery_assembly.py",
+      "source": "propagation worktree @ c537841 + working copy: v2/tests/test_field_recovery_assembly.py",
+      "source_sha256": "04e0db36d0e5e28ce80157f069a719d9fa4e92e01cbf4ef4b4b178cf56104b37",
+      "copied_sha256": "2204c689dfe5e0660fb6eb9c9d90cb3d69a2939cde3fac1e30cf224f645864e3",
+      "migrated_sha256": "2204c689dfe5e0660fb6eb9c9d90cb3d69a2939cde3fac1e30cf224f645864e3"
+    },
+    {
+      "path": "calibration/tests/test_field_recovery_diagnostics.py",
+      "source": "propagation worktree @ c537841 + working copy: v2/tests/test_field_recovery_diagnostics.py",
+      "source_sha256": "56e25c4dfd608f4772cbb8ab18164c2e3fb1f844913258cca065e8d997b049bb",
+      "copied_sha256": "761ed61d7e4fe7a72f7a850b3872e3a973e64642e9e0e56743d91095c459da9d",
+      "migrated_sha256": "761ed61d7e4fe7a72f7a850b3872e3a973e64642e9e0e56743d91095c459da9d"
+    },
+    {
+      "path": "calibration/tests/test_field_recovery_near_boundary.py",
+      "source": "propagation worktree @ c537841 + working copy: v2/tests/test_field_recovery_near_boundary.py",
+      "source_sha256": "c86ba83e36aacc6817975b92c42c32bb3db9bbbaa61b90df5ab57888173d929f",
+      "copied_sha256": "c86ba83e36aacc6817975b92c42c32bb3db9bbbaa61b90df5ab57888173d929f",
+      "migrated_sha256": "c86ba83e36aacc6817975b92c42c32bb3db9bbbaa61b90df5ab57888173d929f"
+    },
+    {
+      "path": "calibration/tests/test_field_recovery_preparation.py",
+      "source": "propagation worktree @ c537841 + working copy: v2/tests/test_field_recovery_preparation.py",
+      "source_sha256": "99e4d33b677bac9f9ee7db9270069bfd998aa369f51995e3b9896430da0dcc87",
+      "copied_sha256": "246788bdc91a3fb6c050df05289f2bda8046d6471503047ecd78c5bb62650679",
+      "migrated_sha256": "246788bdc91a3fb6c050df05289f2bda8046d6471503047ecd78c5bb62650679"
+    },
+    {
+      "path": "calibration/tests/test_field_recovery_refinement.py",
+      "source": "propagation worktree @ c537841 + working copy: v2/tests/test_field_recovery_refinement.py",
+      "source_sha256": "1bfce677bde0b04d6f37cc0651e379c95bdf907027d25d581d0b9b0336ad943e",
+      "copied_sha256": "8bf5e7e662bf640334720c082cce04685f6e76a97cd8c7d456c8cdecb4dc9d0b",
+      "migrated_sha256": "8bf5e7e662bf640334720c082cce04685f6e76a97cd8c7d456c8cdecb4dc9d0b"
+    },
+    {
+      "path": "calibration/tests/test_field_recovery_single_reference.py",
+      "source": "propagation worktree @ c537841 + working copy: v2/tests/test_field_recovery_single_reference.py",
+      "source_sha256": "9315c4bdfadf524c355a6ec981f3dfb7bb8ceb10a347b5e3cc327c0e896838c0",
+      "copied_sha256": "9315c4bdfadf524c355a6ec981f3dfb7bb8ceb10a347b5e3cc327c0e896838c0",
+      "migrated_sha256": "9315c4bdfadf524c355a6ec981f3dfb7bb8ceb10a347b5e3cc327c0e896838c0"
+    },
+    {
+      "path": "calibration/tests/test_alignment_trial.py",
+      "source": "propagation worktree @ c537841 + working copy: v2/tests/test_alignment_trial.py",
+      "source_sha256": "9658b714445acb6e357f0abcc899eaf78b3903c9424ee4008cd02d074837214d",
+      "copied_sha256": "85544e26bede660db3f45051676f4edec26bf79e37b793d5a8c693ee4b101eeb",
+      "migrated_sha256": "85544e26bede660db3f45051676f4edec26bf79e37b793d5a8c693ee4b101eeb"
+    },
+    {
+      "path": "calibration/field_recovery.py",
+      "source": "e46fd47 stash@{0}:v2/field_recovery.py",
+      "source_sha256": "7965a0484aa0314bd359879c7bb4b872f6b1cf6048acd75100064f3b9ff37826",
+      "copied_sha256": "7965a0484aa0314bd359879c7bb4b872f6b1cf6048acd75100064f3b9ff37826",
+      "migrated_sha256": "7965a0484aa0314bd359879c7bb4b872f6b1cf6048acd75100064f3b9ff37826"
+    },
+    {
+      "path": "calibration/field_propagation.py",
+      "source": "e46fd47 stash@{0}^3:v2/field_propagation.py",
+      "source_sha256": "5d088acb16802d1ee448d64f43eb16e8a4fd8f7f823d81532e652bc8c920b137",
+      "copied_sha256": "efae801a0cdc11f4253080fdaa6ecb3dce1b3a1f6c895514e278480315e0d8f6",
+      "migrated_sha256": "efae801a0cdc11f4253080fdaa6ecb3dce1b3a1f6c895514e278480315e0d8f6"
+    },
+    {
+      "path": "calibration/tools/fit_field_propagation.py",
+      "source": "e46fd47 stash@{0}^3:v2/tools/fit_field_propagation.py",
+      "source_sha256": "19e85ed17f269a9b792af14486bad1ae5efb201ee8b188c4debc2c927330d7c0",
+      "copied_sha256": "8db30311f1aaf79851624a2ba37878c671ee59118d91b3d08811ac6f06d3d9b7",
+      "migrated_sha256": "508ce7e3d28779aab03a70e8cf51d45331f9ce490f475416e21c794c2ba07919"
+    },
+    {
+      "path": "calibration/tests/test_field_propagation.py",
+      "source": "e46fd47 stash@{0}^3:v2/tests/test_field_propagation.py",
+      "source_sha256": "bcbb8f7b78fe477c4a94318d5359f78bc37c67ec38243f2520501cfdcdaa1312",
+      "copied_sha256": "56ad2a09ea6f8e135ea4c3ee352f57749a19c57e53c8d79226e1b0715a77fc5b",
+      "migrated_sha256": "56ad2a09ea6f8e135ea4c3ee352f57749a19c57e53c8d79226e1b0715a77fc5b"
+    }
+  ],
+  "adaptations": [
+    "Python package renamed from v2 to calibration; existing artifact schemas retained.",
+    "Standalone web and private data paths; root routes to the editor.",
+    "Game navigation removed because alignment is the only active app.",
+    "Propagation runner freezes executable helper files; references to historical skill documents removed.",
+    "Numerical library versions retained; JavaScript dependencies resolved into a new lockfile.",
+    "Added the existing brand mark as an SVG app icon and a descriptive browser title after browser QA found a missing favicon."
+  ]
+}

@@ -1,0 +1,15 @@
+{
+  "name": "aisoccercoach-v7",
+  "version": "0.1.0",
+  "private": true,
+  "packageManager": "pnpm@10.28.2",
+  "scripts": {
+    "dev": "pnpm --dir web dev",
+    "build": "pnpm --dir web build",
+    "start": "pnpm --dir web start",
+    "test": "pnpm --dir web test",
+    "typecheck": "pnpm --dir web typecheck",
+    "lint": "pnpm --dir web lint",
+    "test:python": ".venv/bin/python -m pytest calibration/tests -q"
+  }
+}

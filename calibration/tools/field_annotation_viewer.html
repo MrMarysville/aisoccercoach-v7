@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Source frame annotation</title>
+<style>
+:root{color-scheme:dark;font:15px system-ui;background:#161a1f;color:#edf0f3}*{box-sizing:border-box}[hidden]{display:none!important}body{margin:0}header{padding:14px 20px;border-bottom:1px solid #3b4149}h1{font-size:22px;margin:0 0 5px}p{margin:5px 0}.amber{color:#f8c566}.controls{padding:10px 16px;display:flex;gap:10px;flex-wrap:wrap;align-items:end}label{display:grid;gap:4px;font-size:13px}button,input,select{font:inherit;padding:8px;background:#272e36;color:#f2f4f6;border:1px solid #697381;border-radius:4px}button{cursor:pointer}button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid #f8c566;outline-offset:2px}button:disabled{opacity:.5;cursor:default}#save{background:#60481e;border-color:#b58735}#viewport{overflow:auto;height:calc(100vh - 270px);min-height:260px;margin:0 16px;border:1px solid #59636f}canvas{display:block;cursor:crosshair;max-width:none;touch-action:none}footer{padding:10px 20px;display:flex;gap:20px;align-items:start}#features{max-height:90px;overflow:auto;min-width:300px}#features button{display:block;padding:4px 8px;margin-bottom:3px;font-size:13px}#status{white-space:pre-wrap;overflow-wrap:anywhere}#reason{width:280px}small{color:#b9c1c9}#frameInfo{font-variant-numeric:tabular-nums}
+</style></head><body>
+<header><h1>Source frame annotation</h1><p class="amber">Proposed markings · Geometry has not been validated</p><small id="frameInfo">Loading permitted source frames…</small></header>
+<div class="controls">
+<label>Source frame<select id="frame"></select></label>
+<label>Zoom<select id="zoom"><option value="0.5">50%</option><option value="1">100%</option><option value="2">200%</option></select></label>
+<label>View<select id="view"><option value="original">Original frame</option><option value="review" disabled>Measured overlay</option></select></label>
+<label>Marking<select id="label"></select></label>
+<label>Type<select id="kind"><option value="polyline">Polyline</option><option value="point">Named intersection point</option></select></label>
+<label id="customLabel" hidden>Intersection name<input id="intersection" placeholder="halfway × touch_near" maxlength="200"></label>
+<label>Reason (optional)<input id="reason" maxlength="4000" placeholder="Visible paint; avoid player occlusion"></label>
+<button id="new">New marking</button><button id="remove" disabled>Remove marking</button><button id="undo" disabled>Undo</button><button id="save">Save revision</button>
+</div>
+<div id="viewport"><canvas id="canvas" aria-label="Source-bound frame. Click visible paint to add a proposed point."></canvas></div>
+<footer><div id="features"></div><div><p id="status" role="status" aria-live="polite"></p><small>Click along visible paint. New marking begins a separate feature. Saved revisions remain available.</small></div></footer>
+<script>
+'use strict';
+const $=id=>document.getElementById(id), canvas=$('canvas'), ctx=canvas.getContext('2d'), viewport=$('viewport');
+let state, annotation, active=null, history=[], image=null, imageReady=false, loadToken=0, dirty=false, saving=false;
+const clone=x=>structuredClone(x);
+const frame=()=>state.frames.find(f=>f.index===Number($('frame').value));
+const stamp=()=>performance.now();
+function action(name, detail={}, timestamp=stamp()){annotation.action_log.push({action:name,event_timestamp:timestamp,frame_index:frame().index,...detail});dirty=true;}
+function status(message){$('status').textContent=message;}
+function checkpoint(){history.push({features:clone(annotation.features),active});$('undo').disabled=false;}
+function resize(){const f=frame(),zoom=Number($('zoom').value);canvas.width=f.native_size[0];canvas.height=f.native_size[1];canvas.style.width=f.native_size[0]*zoom+'px';canvas.style.height=f.native_size[1]*zoom+'px';render();}
+function render(){
+ ctx.clearRect(0,0,canvas.width,canvas.height);if(imageReady&&image)ctx.drawImage(image,0,0,canvas.width,canvas.height);
+ const zoom=Number($('zoom').value);ctx.strokeStyle='#ffbf45';ctx.fillStyle='#ffbf45';ctx.lineWidth=2/zoom;ctx.font=`${13/zoom}px system-ui`;
+ for(const f of annotation.features.filter(f=>f.frame_index===frame().index)){
+  ctx.beginPath();f.points.forEach((p,i)=>{const [x,y]=p.native_xy;if(i)ctx.lineTo(x+.5,y+.5);else ctx.moveTo(x+.5,y+.5);});ctx.stroke();
+  f.points.forEach(p=>{const [x,y]=p.native_xy;ctx.beginPath();ctx.arc(x+.5,y+.5,4/zoom,0,2*Math.PI);ctx.stroke();});
+  const p=f.points[0];if(p)ctx.fillText(f.label,p.native_xy[0]+.5+7/zoom,p.native_xy[1]+.5-7/zoom);
+ }
+ $('remove').disabled=!active||saving;
+ $('features').replaceChildren();for(const feature of annotation.features.filter(f=>f.frame_index===frame().index)){
+  const button=document.createElement('button');button.textContent=`${feature.id===active?'→ ':''}${feature.label} · ${feature.points.length} points`;
+  button.onclick=()=>{active=feature.id;$('kind').value=feature.kind;$('reason').value=feature.reason;if(feature.kind==='point')$('intersection').value=feature.label;else $('label').value=feature.label;$('customLabel').hidden=feature.kind!=='point';render();};$('features').append(button);
+ }
+}
+async function loadFrame(){
+ const token=++loadToken,f=frame();active=null;imageReady=false;
+ $('view').querySelector('[value="review"]').disabled=!f.review_url;if(!f.review_url)$('view').value='original';
+ $('frameInfo').textContent=`Game ${f.game_id} · Frame ${f.index} · Source ${f.source_seconds.toFixed(6)} s · PTS ${f.source_pts} × ${f.source_time_base} · ${f.native_size.join(' × ')} px`;
+ resize();const candidate=new Image();candidate.onload=()=>{if(token!==loadToken)return;if(candidate.naturalWidth!==f.native_size[0]||candidate.naturalHeight!==f.native_size[1]){status('Image dimensions differ from source frame.');return;}image=candidate;imageReady=true;render();};candidate.onerror=()=>{if(token===loadToken)status('Frame image could not be loaded.');};candidate.src=$('view').value==='review'?f.review_url:f.image_url;
+}
+canvas.addEventListener('pointerdown',event=>{
+ if(event.button!==0||!imageReady||saving)return;const f=frame(),rect=canvas.getBoundingClientRect(),zoom=Number($('zoom').value);
+ const point={native_xy:[(event.clientX-rect.left)*f.native_size[0]/rect.width-.5,(event.clientY-rect.top)*f.native_size[1]/rect.height-.5],client_xy:[event.clientX,event.clientY],display_rect:{left:rect.left,top:rect.top,width:rect.width,height:rect.height},scroll_xy:[viewport.scrollLeft+window.scrollX,viewport.scrollTop+window.scrollY],zoom,method:'browser_pointer',event_timestamp:event.timeStamp,frame_index:f.index,view:$('view').value,review_image_sha256:$('view').value==='review'?f.review_image_sha256:null};
+ if(point.native_xy.some((v,i)=>v<-.5||v>=f.native_size[i]-.5))return;
+ const kind=$('kind').value,label=kind==='point'?$('intersection').value.trim():$('label').value;if(!label){status('Name the intersection before placing its point.');return;}
+ checkpoint();let feature=annotation.features.find(v=>v.id===active);
+ if(!feature||feature.kind==='point'||feature.label!==label||feature.frame_index!==f.index){feature={id:crypto.randomUUID(),frame_index:f.index,label,kind,reason:$('reason').value,points:[],review_status:'proposed'};for(const key of ['game_id','source_sha256','source_pts','source_time_base','native_size','image_sha256'])feature[key]=clone(f[key]);annotation.features.push(feature);active=feature.id;}
+ feature.points.push(point);action('pointer',{feature_id:feature.id,point:clone(point)},event.timeStamp);status(`Unsaved · ${label}: ${feature.points.length} points`);render();
+});
+$('new').onclick=()=>{active=null;action('new_marking');render();status('Next click starts a new marking.');};
+$('remove').onclick=()=>{if(!active)return;checkpoint();const removed=active;annotation.features=annotation.features.filter(f=>f.id!==active);active=null;action('remove_marking',{feature_id:removed});render();status('Marking removed. Undo can restore it; save retains this change.');};
+$('undo').onclick=()=>{if(!history.length)return;const previous=history.pop();annotation.features=previous.features;active=previous.active;action('undo');$('undo').disabled=!history.length;render();status('Last point undone. Save a revision to retain this change.');};
+$('label').onchange=()=>{active=null;};$('kind').onchange=()=>{active=null;$('customLabel').hidden=$('kind').value!=='point';};
+$('reason').onchange=()=>{const feature=annotation.features.find(f=>f.id===active);if(feature){checkpoint();feature.reason=$('reason').value;action('reason',{feature_id:active,reason:feature.reason});}};
+$('zoom').onchange=()=>{action('zoom',{zoom:Number($('zoom').value)});resize();};
+$('frame').onchange=()=>{action('select_frame');loadFrame();};$('view').onchange=()=>{action('select_view',{view:$('view').value,review_image_sha256:frame().review_image_sha256});loadFrame();};
+$('save').onclick=async()=>{
+ saving=true;const controls=[...document.querySelectorAll('button,input,select')].map(element=>[element,element.disabled]);controls.forEach(([element])=>element.disabled=true);action('save_revision');const payload={...clone(annotation),revision:annotation.revision+1,previous_revision_sha256:state.revision_sha256};
+ try{const response=await fetch('/api/save',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)}),result=await response.json();if(!response.ok)throw new Error(result.error);annotation=result.annotation;state.revision_sha256=result.revision_sha256;dirty=false;status(`Saved revision ${annotation.revision} · Proposed · ${annotation.features.length} markings`);}catch(error){status(`Save failed: ${error.message}`);}finally{saving=false;controls.forEach(([element,disabled])=>element.disabled=disabled);render();}
+};
+window.addEventListener('beforeunload',event=>{if(dirty){event.preventDefault();event.returnValue='';}});
+async function start(){try{const response=await fetch('/api/state');state=await response.json();if(!response.ok)throw new Error(state.error);annotation=state.annotation;for(const f of state.frames){const option=document.createElement('option');option.value=f.index;option.textContent=`${f.index} · ${f.source_seconds.toFixed(3)} s`;$('frame').append(option);}for(const label of state.labels){const option=document.createElement('option');option.textContent=label;$('label').append(option);}await loadFrame();status(`Revision ${annotation.revision} · ${annotation.features.length} proposed markings`);}catch(error){status(`Cannot load annotations: ${error.message}`);$('save').disabled=true;}}
+window.annotationReviewState=()=>({annotation:clone(annotation),imageReady,frame:clone(frame()),active,dirty});start();
+</script></body></html>

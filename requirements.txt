@@ -1,0 +1,5 @@
+# Preserve the numerical environment used by the reviewed development fits.
+numpy==1.26.4
+scipy==1.13.1
+opencv-python-headless==4.10.0.84
+pytest==8.4.1

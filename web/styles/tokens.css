@@ -1,0 +1,53 @@
+/* Night Pitch design tokens. Every component reads these; no literal colours elsewhere. */
+:root {
+  /* grounds: the pitch at night, greens so dark they read as black */
+  --bg-0: #0A100C;
+  --bg-1: #111A14;
+  --bg-2: #182219;
+  --bg-3: #1F2B23;
+  --line-1: #26352C;
+  --line-2: #33453A;
+
+  /* text */
+  --text-1: #EAF0EB;
+  --text-2: #A8B5AC;
+  --text-3: #728078;
+
+  /* chalk: the one colour for the action that matters and for confirmed geometry */
+  --chalk: #5EE28C;
+  --chalk-ink: #0B2A18;
+  --chalk-dim: rgba(94, 226, 140, 0.16);
+
+  /* semantics: amber means "needs a look", red means a real failure */
+  --amber: #E5B562;
+  --amber-dim: rgba(229, 181, 98, 0.16);
+  --red: #E9776B;
+  --red-dim: rgba(233, 119, 107, 0.16);
+
+  /* team swatches are chosen per match from the real kit; these are only fallbacks */
+  --team-us: #5EE28C;
+  --team-them: #EAF0EB;
+
+  /* type */
+  --font-display: var(--font-barlow-condensed), "Barlow Condensed", "Arial Narrow", sans-serif;
+  --font-text: var(--font-barlow), Barlow, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: var(--font-ibm-plex-mono), "IBM Plex Mono", Menlo, monospace;
+  --fs-display: 36px;
+  --fs-title: 26px;
+  --fs-h2: 18px;
+  --fs-body: 14px;
+  --fs-small: 12px;
+
+  /* rhythm */
+  --radius-card: 14px;
+  --radius-panel: 12px;
+  --radius-control: 6px;
+  --control-h: 44px;
+  --control-h-sm: 36px;
+  --gap-page: 28px;
+  --gap-section: 20px;
+  --gap-inline: 8px;
+  --topbar-h: 56px;
+  --shadow-lift: 0 12px 32px rgba(0, 0, 0, 0.35);
+  --focus: 0 0 0 2px var(--bg-0), 0 0 0 4px var(--chalk);
+}

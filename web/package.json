@@ -1,0 +1,27 @@
+{
+  "name": "@aisoccercoach-v7/web",
+  "private": true,
+  "version": "0.1.0",
+  "scripts": {
+    "dev": "node ./node_modules/next/dist/bin/next dev --webpack --hostname 127.0.0.1 --port 3100",
+    "build": "node ./node_modules/next/dist/bin/next build --webpack",
+    "start": "node ./node_modules/next/dist/bin/next start --hostname 127.0.0.1 --port 3100",
+    "typecheck": "node ./node_modules/typescript/bin/tsc --noEmit --pretty false",
+    "lint": "node ./node_modules/eslint/bin/eslint.js .",
+    "test": "node ./node_modules/vitest/vitest.mjs run"
+  },
+  "dependencies": {
+    "next": "16.3.3",
+    "react": "19.2.8",
+    "react-dom": "19.2.8"
+  },
+  "devDependencies": {
+    "@types/node": "^24",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "16.3.3",
+    "typescript": "^5",
+    "vitest": "^3"
+  }
+}

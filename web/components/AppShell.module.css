@@ -1,0 +1,10 @@
+.shell { display: grid; grid-template-rows: var(--topbar-h) 1fr; height: 100vh; }
+.bar { display: flex; align-items: center; gap: 28px; padding: 0 var(--gap-page); border-bottom: 1px solid var(--line-1); background: var(--bg-0); }
+.brand { display: flex; align-items: center; gap: 12px; }
+.mark { width: 26px; height: 26px; border-radius: 6px; background: var(--chalk); }
+.name { font-size: 20px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; }
+.nav { display: flex; gap: 4px; margin-left: 8px; }
+.nav a { display: flex; align-items: center; height: 40px; padding: 0 14px; border-radius: var(--radius-control); color: var(--text-2); font-weight: 500; }
+.nav a:hover { color: var(--text-1); background: var(--bg-2); }
+.meta { margin-left: auto; color: var(--text-3); font-size: var(--fs-small); }
+.main { min-height: 0; overflow: hidden; padding: 24px var(--gap-page) var(--gap-page); display: flex; flex-direction: column; gap: var(--gap-section); }
