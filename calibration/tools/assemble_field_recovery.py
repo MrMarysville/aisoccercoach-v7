@@ -4,11 +4,19 @@ from copy import deepcopy
 import json
 from pathlib import Path
 
-from calibration.alignment_trial import sha256_file
+from calibration.alignment_trial import sha256_file, source_time
+
+
+FRAME_KEYS = ('source_pts', 'source_time_base', 'image_sha256', 'native_size')
+
+
+def frame_identity(row):
+    source_time(row['source_pts'], row['source_time_base'])
+    return row['source_pts'], row['source_time_base'], row['image_sha256'], tuple(row['native_size'])
 
 
 def assemble(frames_path, paint_path, review_path, split_path, output, parent_path=None, reference_indices=None,
-             boundary_label='touch_far', parent_atlas_path=None):
+             boundary_label='touch_far', parent_atlas_path=None, annotation_frames_path=None):
     paths = list(map(Path, (frames_path, paint_path, review_path, split_path, output)))
     frames_path, paint_path, review_path, split_path, output = paths
     frames, paint, review, split = [json.loads(p.read_text()) for p in paths[:4]]
@@ -23,25 +31,65 @@ def assemble(frames_path, paint_path, review_path, split_path, output, parent_pa
         raise ValueError('Reviewed measurement hash mismatch')
     if review['annotation_sha256'] != paint['annotation_sha256']:
         raise ValueError('Reviewed annotation hash mismatch')
+    manifest_hash = sha256_file(frames_path)
+    if split.get('frames_manifest_sha256') != manifest_hash:
+        raise ValueError('Frozen split/full frame-manifest mismatch')
     fit, check = map(set, (split['fit_frame_indices'], split['check_frame_indices']))
     by_index = {r['index']: r for r in frames['frames']}
+    by_identity = {frame_identity(r): r for r in frames['frames']}
+    if len(by_index) != len(frames['frames']) or len(by_identity) != len(frames['frames']):
+        raise ValueError('Duplicate full-manifest frame index or identity')
     if not fit or fit & check or (fit | check) != set(by_index):
         raise ValueError('Split must partition every source frame without overlap')
+    annotation_rows = None
+    if annotation_frames_path is not None:
+        annotation_frames_path = Path(annotation_frames_path)
+        if sha256_file(annotation_frames_path) != paint['frames_manifest_sha256']:
+            raise ValueError('Paint/annotation frame-manifest mismatch')
+        annotation_frames = json.loads(annotation_frames_path.read_text())
+        if annotation_frames['source']['sha256'] != source:
+            raise ValueError('Annotation manifest/source mismatch')
+        annotation_rows = {r['index']: r for r in annotation_frames['frames']}
+        if len(annotation_rows) != len(annotation_frames['frames']):
+            raise ValueError('Duplicate annotation frame index')
+    elif paint['frames_manifest_sha256'] == manifest_hash:
+        annotation_rows = by_index
     accepted = set(review['accepted_feature_ids'])
     all_measured = {f['feature_id']: f for f in paint['measurements']}
     if not accepted or not accepted <= set(all_measured):
         raise ValueError('Reviewed feature missing from measurement record')
     references = []
+    remaps = []
     used = set()
     for ref in paint['references']:
         features = [f for f in ref['features'] if f['feature_id'] in accepted]
         if not features:
             continue
-        index = ref['frame_index']
+        old_index = ref['frame_index']
+        if annotation_rows is not None:
+            if old_index not in annotation_rows:
+                raise ValueError('Paint frame missing from its annotation manifest')
+            original = annotation_rows[old_index]
+            if any(k in ref and (type(ref[k]) is not type(original[k]) or ref[k] != original[k])
+                   for k in FRAME_KEYS):
+                raise ValueError('Paint exact frame binding differs from annotation manifest')
+        else:
+            if not all(k in ref for k in FRAME_KEYS):
+                raise ValueError('Subset paint without exact frame binding requires --annotation-frames')
+            original = ref
+        if original.get('source_sha256', source) != source or ref.get('source_sha256', source) != source:
+            raise ValueError('Paint frame/source mismatch')
+        row = by_identity.get(frame_identity(original))
+        if row is None:
+            raise ValueError('Measured paint frame identity does not match full manifest')
+        if row.get('source_sha256', source) != source:
+            raise ValueError('Full-manifest frame/source mismatch')
+        index = row['index']
         if index not in fit:
             raise ValueError('Fit feature is on a reserved check frame')
-        row = by_index[index]
-        bound = {k: row[k] for k in ('source_pts', 'source_time_base', 'native_size', 'image_sha256')}
+        bound = {k: row[k] for k in FRAME_KEYS}
+        if old_index != index:
+            remaps.append(dict(annotation_frame_index=old_index, frame_index=index, **bound))
         bound.update(frame_index=index, features=features)
         if parent_path is None:
             if ref['chart'] not in ('left', 'mid', 'right'):
@@ -98,8 +146,11 @@ def assemble(frames_path, paint_path, review_path, split_path, output, parent_pa
                 boundary_source_review=review, boundary_source_review_sha256=sha256_file(review_path),
                 boundary_raw_measurements_sha256=sha256_file(paint_path))
     result['assembly_provenance'] = dict(helper_sha256=sha256_file(__file__), split_sha256=sha256_file(split_path),
+        paint_frames_manifest_sha256=paint['frames_manifest_sha256'], reference_frame_index_remaps=remaps,
         semantic_features_without_fit_samples=missing_fit_features,
         semantic_features_without_fit_samples_reason='Fewer than three sampler-selected source points; not promoted')
+    if annotation_frames_path is not None:
+        result['assembly_provenance']['annotation_frames_path'] = str(annotation_frames_path.resolve())
     if reference_indices is not None:
         result['assembly_provenance']['selected_reference_frame_indices'] = sorted(set(reference_indices))
         result['assembly_provenance']['deferred_reference_frame_indices'] = [r['frame_index'] for r in deferred]
@@ -120,9 +171,11 @@ def main():
     parser.add_argument('--reference-frame', type=int, action='append', help='Explicit source-selected chart reference; retain other reviewed views as deferred observations')
     parser.add_argument('--boundary-label', choices=('touch_far', 'touch_near'), default='touch_far')
     parser.add_argument('--parent-atlas', type=Path, help='Exact saved parent required for a near-boundary revision')
+    parser.add_argument('--annotation-frames', type=Path, help='Hash-matched original annotation manifest for legacy subset paint without inline frame identities')
     args = parser.parse_args()
     print(json.dumps(assemble(args.frames, args.paint, args.review, args.split, args.out,
-                             args.parent_measurements, args.reference_frame, args.boundary_label, args.parent_atlas), indent=2))
+                             args.parent_measurements, args.reference_frame, args.boundary_label, args.parent_atlas,
+                             args.annotation_frames), indent=2))
 
 
 if __name__ == '__main__':

@@ -83,6 +83,11 @@ def test_exact_development_ids_keep_source_phase_and_prefrozen_split(frozen, tmp
     assert len(split["fit_frame_indices"]) == 31
     assert len(split["check_frame_indices"]) == 269
     assert split["broad_annotation_check_indices"] == [5, 55, 105, 155, 205, 255]
+    assert split["frames_manifest_sha256"] == receipt["frames_sha256"] == sha256_file(out/"source/frames.json")
+    assert receipt["split_sha256"] == sha256_file(out/"split.json")
+    declared = json.loads((out/"role-declaration.json").read_text())
+    assert split["predecode_role_declaration_sha256"] == sha256_file(out/"role-declaration.json")
+    assert {k:v for k,v in split.items() if k not in ("frames_manifest_sha256", "predecode_role_declaration_sha256")} == declared
     verify.assert_called_once()
     decode.assert_called_once()
 

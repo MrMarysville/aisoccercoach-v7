@@ -61,6 +61,8 @@ subset manifest beside it containing only the designated fit rows and the
 parent manifest SHA. Keep source paths relative to that directory. Give the
 independent reviewer separate predeclared check frames. Source-only view
 selection is allowed; fitted projections must not select check evidence.
+Preparation preserves the predecode role declaration and adds the completed
+manifest hash to `split.json` without changing those roles.
 
 ## Browser proposal and paint review
 
@@ -129,6 +131,14 @@ does not promote rejected cross sections or create a fit from a sparse portion.
 ```bash
 .venv/bin/python -m calibration.tools.assemble_field_recovery --frames ALL_FRAMES_JSON --paint PAINT_MEASUREMENTS_JSON --review SOURCE_REVIEW_JSON --split SPLIT_JSON --out REVIEWED_MEASUREMENTS_JSON
 ```
+
+Assembly requires the split's full-manifest hash and validates each original
+paint frame by exact PTS/time base/image hash/native size. New sampler output
+retains these identities. For legacy subset paint without inline identities,
+add `--annotation-frames FIT_FRAMES_JSON` using its original hash-matched
+annotation manifest. Verified same-source index remaps are recorded and may
+never target a check frame. A subset hash need not equal the full-manifest hash;
+neither a shared source-video hash nor a matching frame index permits rebinding.
 
 When multiple reviewed frames show the same end, select the primary source view
 explicitly with `--reference-frame INDEX`. Other accepted views remain in

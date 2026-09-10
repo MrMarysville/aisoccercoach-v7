@@ -220,7 +220,8 @@ def measure(frames_path, annotation_path, output, chart_by_index, radius=6., tur
                             tuple(np.rint(coarse[0]).astype(int)), cv2.FONT_HERSHEY_SIMPLEX,
                             .45, (0, 255, 255), 1, cv2.LINE_AA)
         references.append(dict(frame_index=index, chart=chart_by_index.get(index, "unassigned"),
-                               features=measured))
+                               features=measured, **{k: frame[k] for k in
+                                   ("source_pts", "source_time_base", "image_sha256", "native_size")}))
         target = output / f"review-{index:05d}.png"
         cv2.imwrite(str(target), overlay)
         review[str(index)] = str(target.resolve())

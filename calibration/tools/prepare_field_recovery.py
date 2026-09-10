@@ -129,6 +129,7 @@ def prepare(plan_path, episode, output, *, catalog_path=CATALOG):
                     annotation_policy="Fresh source-only proposals; no old fitted maps or coordinates",
                     status="development experiment; not metric certification")
     (output / "split.json").write_text(json.dumps(protocol, indent=2) + "\n")
+    predecode_split_hash = sha256_file(output / "split.json")
     source = verify_source(game)
     if (source.get("game_id"), source.get("sha256"), source.get("bytes")) != (
             game["game_id"], game["source_sha256"], game["source_bytes"]):
@@ -138,6 +139,14 @@ def prepare(plan_path, episode, output, *, catalog_path=CATALOG):
     manifest = decode_window(game, source, start, end, 10, output / "source")
     unchanged_inputs()
     stamps = validate_decoded(manifest, game, source, selection)
+    if sha256_file(output / "split.json") != predecode_split_hash:
+        raise ValueError("Frozen frame roles changed during preparation")
+    # Preserve the declaration made before decoding; bind the same roles to the
+    # completed exact-source manifest only after all decoding checks pass.
+    (output / "role-declaration.json").write_bytes((output / "split.json").read_bytes())
+    protocol.update(frames_manifest_sha256=sha256_file(output / "source/frames.json"),
+                    predecode_role_declaration_sha256=predecode_split_hash)
+    (output / "split.json").write_text(json.dumps(protocol, indent=2) + "\n")
     receipt = dict(episode=episode, count=count, first_pts=manifest["frames"][0]["source_pts"],
                    last_pts=manifest["frames"][-1]["source_pts"], source_time_base=manifest["frames"][0]["source_time_base"],
                    measured_first_s=float(stamps[0]), measured_last_s=float(stamps[-1]),

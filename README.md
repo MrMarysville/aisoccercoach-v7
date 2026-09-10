@@ -57,6 +57,10 @@ wheel; both provide `cv2`.
 - `out/`: ignored new experiment outputs.
 - `migration.json`: source provenance for the selected imported code.
 
+The [2026-09-10 independent audit](calibration/AUDIT-2026-09-10.md) records the
+confirmed defects, source-evidence limits and next discriminating experiments.
+See `CURRENT-WORK.md` for subsequent fixes and measured status.
+
 The migrated workstation has two prepared review clips under `data/review/`:
 `granite-control` and `butte-h2-slot2`. Each retains its source video, packet,
 manifest, base mapping, active revision and saved revision history. A fresh Git
