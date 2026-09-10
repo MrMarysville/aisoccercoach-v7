@@ -19,6 +19,11 @@ The fresh v7 control and four-window qualification are still in progress.
 See [the setup comparison and next work](CURRENT-WORK.md) before continuing an
 experiment or planning app integration.
 
+The intended finished product accepts a video upload and invokes Codex to perform
+source marking/review before the local calibration and checking flow. That
+upload/agent orchestration is unbuilt. Current development markup is performed
+by the active agent through the browser; it is not an automated app run.
+
 ## Run
 
 Requirements: Node.js 22+, pnpm 10.28.2, Python 3.11 or 3.12, and local
@@ -101,6 +106,13 @@ image connections and a shared bounded residual. `propagate_field_recovery`
 extends an existing fit through time using adjacent motion and an optional paint lock;
 its paint gauge participates in fitting and is not independent accuracy evidence.
 Both are development tools; automatic full-game execution from the app is unbuilt.
+
+Both fresh fitting CLIs restrict image anchors to the declared fitting split,
+including when `--reference-stride 1` is used with mixed sampling cadences.
+Nearest-reference ranking uses rational source times. New maps bind fitting
+evidence to exact source frames; boundary refinements retain and extend those
+bindings and reject changes to the parent's frame roles. Frozen-plan scoring
+also checks inherited fitting evidence through parent revisions.
 
 Propagation saves each completed frame's mapping and diagnostics atomically.
 Use `--max-frames N` to pause after N additional frames per direction, then repeat

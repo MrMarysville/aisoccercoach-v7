@@ -1,6 +1,12 @@
 """Synthetic checks of conditioned updates; no footage or metric acceptance."""
 from copy import deepcopy
+from fractions import Fraction
+import hashlib
+import json
+from pathlib import Path
+from unittest.mock import patch
 
+import cv2
 import numpy as np
 import pytest
 
@@ -141,3 +147,58 @@ def test_saved_polynomial_is_used_by_supported_inverse_and_warning_gate():
     p["frames"][0]["warnings"] = ["failed_adjacent_motion_step_1"]
     warned = r.RecoveryAtlas.from_payload(p).frame(0, "1/90000", source_sha256="a"*64, native_size=[1920, 1080])
     assert warned.public_projection(world)["status"] == "unavailable"
+
+
+def test_runner_preserves_frozen_roles_fit_evidence_and_source_time(tmp_path):
+    from calibration.tools import fit_field_propagation as runner
+
+    image_path = tmp_path/"synthetic.png"
+    cv2.imwrite(str(image_path), np.zeros((1080, 1920, 3), np.uint8))
+    rows = [dict(index=10*(i+1), file=image_path.name, source_pts=pts,
+                 source_time_base="1/3", source_sha256="a"*64, native_size=[1920, 1080],
+                 image_sha256=hashlib.sha256(image_path.read_bytes()).hexdigest())
+            for i, pts in enumerate([0, 3, 6, 297, 300])]
+    manifest = dict(schema="alignment-trial-frames-v1", source=dict(game_id="synthetic", sha256="a"*64), frames=rows)
+    original = dict(schema="field-recovery-measurements-v1", source_sha256="a"*64,
+                    fit_frame_indices=[10, 20, 40, 50], check_frame_indices=[30],
+                    references=[dict(frame_index=10, chart="left", features=midfield_paint(H))])
+    measurements = deepcopy(original)
+    measurements["references"].append(dict(frame_index=20, chart="mid", features=midfield_paint(H)))
+    for name, value in (("frames", manifest), ("original", original), ("measurements", measurements)):
+        (tmp_path/f"{name}.json").write_text(json.dumps(value))
+    inherited = {k: rows[3][k] for k in ("source_sha256", "source_pts", "source_time_base", "image_sha256", "native_size")}
+    full = [[-r.HALF_L, -r.HALF_W], [r.HALF_L, -r.HALF_W],
+            [r.HALF_L, r.HALF_W], [-r.HALF_L, r.HALF_W]]
+    parent = r.RecoveryAtlas.from_payload(dict(status="approximate", metric_certified=False,
+        projection_mode=r.SINGLE_REFERENCE_PROJECTION_MODE, field=r.FIELD, source=manifest["source"],
+        charts=[dict(chart="left", reference_frame_index=10, field_to_reference=H.tolist(), support_world_polygon=full)],
+        frames=[dict(row, reference_to_native=np.eye(3).tolist(), boundary_offset_native_y_px=0., warnings=[]) for row in rows],
+        provenance=dict(measurements_sha256=runner.sha(tmp_path/"original.json"), fitting_frames=[inherited])))
+    parent.save(tmp_path/"parent.json")
+    poly = dict(degree=2, origin_native_px=[960., 540.], scale_native_px=1920.,
+                coefficients_native_px=np.zeros((6, 2)).tolist(), basis_profile="bounded_radial_v1", radial_scale=2.)
+    with patch.object(runner.propagation, "reference_features", return_value=(None, None)), \
+            patch.object(r, "register_reference", return_value=(np.eye(3), dict(image_registration_pass=True))), \
+            patch.object(runner, "independent_reference_connections", wraps=runner.independent_reference_connections) as connections, \
+            patch.object(runner, "independent_drift_observations", wraps=runner.independent_drift_observations) as drift, \
+            patch.object(runner.propagation, "fit_reference_polynomial", return_value=poly), \
+            patch.object(r, "feature_errors", return_value=np.zeros(3)), \
+            patch.object(r, "visible_geometry_check", return_value=dict(valid=True)):
+        result = runner.run(tmp_path/"parent.json", tmp_path/"original.json", tmp_path/"frames.json",
+                            tmp_path/"measurements.json", tmp_path/"candidate", reference_stride=2, degree="2")
+    declaration = json.loads((tmp_path/"candidate"/"declaration.json").read_text())
+    assert declaration["image_anchor_indices"] == [10, 20, 50]
+    expected_times = {i: Fraction(row["source_pts"], 3) for i, row in enumerate(rows)}
+    assert connections.call_args.kwargs["times"] == drift.call_args.kwargs["times"] == expected_times
+    assert all(isinstance(t, Fraction) for t in connections.call_args.kwargs["times"].values())
+    candidate = r.RecoveryAtlas.load(Path(result["selected_atlas"]))
+    evidence = candidate.payload["provenance"]["fitting_frames"]
+    assert inherited in evidence
+    assert {f["source_pts"] for f in evidence} == {0, 3, 297, 300}
+    assert all(f["source_sha256"] == "a"*64 and f["native_size"] == [1920, 1080] for f in evidence)
+    measurements.update(fit_frame_indices=[10, 20, 30, 50], check_frame_indices=[40])
+    (tmp_path/"relabeled.json").write_text(json.dumps(measurements))
+    with pytest.raises(ValueError, match="roles must remain unchanged"):
+        runner.run(tmp_path/"parent.json", tmp_path/"original.json", tmp_path/"frames.json",
+                   tmp_path/"relabeled.json", tmp_path/"rejected")
+    assert not (tmp_path/"rejected").exists()

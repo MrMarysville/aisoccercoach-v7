@@ -5,6 +5,11 @@ Updated 2026-09-10. This is the canonical repository for future work.
 The owner wants full-game calibration: a source-bound pixel-to-field mapping
 maintained through both halves, with simple visual corrections, independently
 checked accuracy and honest coverage. The Roseville 120 × 70 yd template stays fixed.
+The intended finished flow starts with a video upload, invokes Codex to select,
+label and review source field markings, then runs fitting, propagation and
+independent checks and presents uncertain sections for review. The owner wants
+Codex Astra for labeling; record the actual runtime model when that integration
+runs. Agent-performed development markup is not upload-triggered automation.
 
 The editor currently opens two reviewed development clips: Granite first half
 (351 sampled frames, 35.1 seconds) and Butte second half (300 frames, 30 seconds).
@@ -44,6 +49,39 @@ the complete frame-markup/v7 recipe without requiring the workstation's personal
 skill registrations. The extension runner now accepts three-chart maps, but this
 has not qualified the four minute-long sequences. Older results below retain their
 dated implementation and model scope; they are not the latest v7 acceptance state.
+
+## Calibration code verification — 2026-09-10
+
+Finished the code-review/test milestone before resuming footage experiments.
+Two owner-requested parallel agents reviewed isolated worktrees; the primary
+agent reviewed and integrated their fixes and ran all checks in the active checkout.
+Both fresh fitters now restrict image anchors to declared fitting frames and rank
+reference distance by rational source time. Boundary paint is validated against
+the fit split before fitting. Far/near refinements and the shared-reference fit
+preserve frozen parent roles; far refinement also rejects reindexed manifests.
+Exact fitting evidence survives revisions, and frozen-plan scoring checks nested
+parent provenance so inherited fitting frames cannot become independent checks.
+
+All **200 Python tests passed in 124.53 seconds**, including forward/backward
+resume equivalence, non-identity v7 gauge composition at 1e-12 tolerance,
+mixed-cadence reference selection, fitting-evidence inheritance and rejected role
+changes. All **9 web tests**, typecheck, lint, production build, Python compilation,
+CLI help and whitespace checks passed. The maintained skill validator passed
+using the already-installed system PyYAML with the project interpreter; no runtime
+dependency was added. Logs: `out/code-verification-20260910/`.
+The 18 frozen plan/catalog, parent atlas/manifest and editor artifacts in the
+preservation check still match their recorded hashes. No footage was decoded or
+new source markings approved during this code-verification milestone.
+
+These checks establish code behavior, not a successful fresh footage fit.
+The Granite three-chart control has prepared source-bound inputs and draft
+right-end markup; that draft still needs paint-semantic corrections/review and
+fresh boundary evidence before fitting. Butte's missing right-end reference is
+still unresolved. The four development extensions remain unqualified and all
+four reserved evaluation windows stay closed. Finish the fresh v7 control and
+the unchanged-window qualification, then wire the upload-triggered Codex flow.
+Automatic labeling, automatic initialization and full-game app orchestration
+remain unbuilt; metric certification and full-game acceptance remain false.
 
 ## Three-chart extension compatibility — 2026-09-10
 

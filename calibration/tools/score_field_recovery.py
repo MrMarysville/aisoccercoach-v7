@@ -34,8 +34,12 @@ def load_check_plan(path, manifest, frames_path, atlas):
         raise ValueError("Check plan must preserve a complete disjoint frame split")
     # The atlas stores fitting images by source identity. Image-registration
     # residuals and paint from those images cannot reappear as independent checks.
-    evidence = atlas.payload.get("provenance", {}).get("fitting_frames", [])
-    fitted = {source_time(r["source_pts"], r["source_time_base"]) for r in evidence}
+    provenance = atlas.payload.get("provenance", {})
+    fitted = set()
+    while provenance:
+        fitted.update(source_time(r["source_pts"], r["source_time_base"])
+                      for r in provenance.get("fitting_frames", []))
+        provenance = provenance.get("parent_provenance", {})
     groups = {}
     for group in plan["groups"]:
         index, label = group["frame_index"], group["label"]

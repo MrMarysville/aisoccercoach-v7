@@ -37,7 +37,7 @@ class NearBoundaryTests(unittest.TestCase):
                               reference_to_native=np.eye(3).tolist(), boundary_offset_native_y_px=2.,
                               warnings=["fixture_parent_warning"] if i == 2 else []))
         inputs = root/"parent-inputs.json"
-        inputs.write_text(json.dumps(dict(references=[])))
+        inputs.write_text(json.dumps(dict(references=[], fit_frame_indices=[1, 3], check_frame_indices=[0, 2, 4])))
         payload = dict(status="approximate", metric_certified=False, projection_mode=r.SINGLE_REFERENCE_PROJECTION_MODE,
                        source=dict(game_id="synthetic", sha256="a"*64), field=r.FIELD, blend=r.BLEND,
                        spatial_boundary=None, temporal_boundary=None, protected_y_m=-r.BOX18_HALF_W,
@@ -75,6 +75,7 @@ class NearBoundaryTests(unittest.TestCase):
             self.assertEqual(len(list((root/"new"/"overlay").glob("*.jpg"))), 5)
             self.assertTrue(all(x["valid"] for x in report["geometry"]))
             self.assertEqual(report["source_fit_parameter_frames"], 2)
+            self.assertEqual([f["source_pts"] for f in new.payload["provenance"]["fitting_frames"]], [18000, 36000])
             self.assertEqual(report["interpolated_frames"], 1)
             self.assertEqual(report["outside_observed_span_frames"], 2)
             self.assertAlmostEqual(report["source_fit_observations"][0]["fitted_delta_field_y_m"], -1., places=7)
@@ -114,6 +115,11 @@ class NearBoundaryTests(unittest.TestCase):
                 with self.subTest(label=label), self.assertRaises(ValueError):
                     self.helper.refine(root/"parent.json", root/"frames.json", path, root/label, render=False)
                 self.assertFalse((root/label).exists())
+            measurements.update(fit_frame_indices=[0, 1, 3], check_frame_indices=[2, 4])
+            (root/"relabelled.json").write_text(json.dumps(measurements))
+            with self.assertRaisesRegex(ValueError, "frozen parent fit/check split"):
+                self.helper.refine(root/"parent.json", root/"frames.json", root/"relabelled.json", root/"relabelled", render=False)
+            self.assertFalse((root/"relabelled").exists())
 
     def test_no_extrapolation_or_invented_zero_anchor(self):
         model = dict(domain_s=[1., 4.], time_s=[1., 4.], delta_field_y_m=[5., 11.])

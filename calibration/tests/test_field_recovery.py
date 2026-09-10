@@ -518,6 +518,21 @@ class RecoveryRunnerTests(unittest.TestCase):
         self.assertEqual(attempts[0]["reason"], "target_already_on_reference_connection_path")
         self.assertEqual(paths[350]["path"], [120, 310, 350])
 
+    def test_drift_ranks_mixed_cadence_references_by_source_time(self):
+        shift = lambda x: np.array([[1., 0, x], [0, 1, 0.], [0, 0, 1.]])
+        registered = {0: np.eye(3), 10: shift(10), 20: shift(100)}
+        paths = {i: dict(path=[0] if i == 0 else [0, i], kind="gauge_direct", cost=None) for i in registered}
+        calls = []
+        def register(a, b):
+            calls.append((a, b))
+            return shift(2), dict(image_registration_pass=True)
+        observations, selected, _ = self.runner.independent_drift_observations(
+            0, [0, 10, 20], [11], registered, paths, register,
+            times={0: 0., 10: 1., 11: 99., 20: 100.})
+        self.assertEqual(calls, [(20, 11)])
+        self.assertEqual(selected[11]["path"], [0, 20, 11])
+        np.testing.assert_array_equal(observations[11], shift(102))
+
     def fixture(self, directory, h=None, features=None):
         h = np.diag([.2, .2, 1.]) @ H if h is None else h
         rows = []
@@ -549,6 +564,9 @@ class RecoveryRunnerTests(unittest.TestCase):
                 result = self.runner.run(root/"frames.json", root/"measurements.json", root/"first", render=False, reference_stride=1)
             self.assertEqual(result["frames_with_warnings"], 2)
             a = r.RecoveryAtlas.load(root/"first"/"atlas.json")
+            declaration = json.loads((root/"first"/"fit-declaration.json").read_text())
+            self.assertEqual(declaration["image_anchor_frame_indices"], [0])
+            self.assertEqual([f["source_pts"] for f in a.payload["provenance"]["fitting_frames"]], [9000])
             self.assertTrue(a.payload["frames"][1]["warnings"])
             self.assertTrue(a.payload["frames"][2]["warnings"])
             shift = np.array([[1., 0, -9.], [0, 1, 0.], [0, 0, 1.]])
@@ -609,6 +627,11 @@ class RecoveryRunnerTests(unittest.TestCase):
             (root/"bad.json").write_text(json.dumps(measurements))
             with self.assertRaises(ValueError):
                 self.runner.load_inputs(root/"frames.json", root/"bad.json")
+            measurements["references"][0]["frame_index"] = 0
+            measurements["boundary_observations"] = [dict(frame_index=1, features=samples())]
+            (root/"bad-boundary.json").write_text(json.dumps(measurements))
+            with self.assertRaises(ValueError):
+                self.runner.load_inputs(root/"frames.json", root/"bad-boundary.json")
 
 
 if __name__ == "__main__":

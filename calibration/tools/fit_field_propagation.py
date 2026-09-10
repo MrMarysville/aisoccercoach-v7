@@ -19,7 +19,8 @@ from scipy.spatial import cKDTree
 from calibration import field_propagation as propagation
 from calibration import field_recovery as recovery
 from calibration.tools.fit_field_recovery import (independent_drift_observations,
-                                         independent_reference_connections, load_inputs)
+                                         independent_reference_connections, image_anchor_positions,
+                                         fitting_frame_bindings, load_inputs)
 
 
 def sha(path):
@@ -40,6 +41,9 @@ def run(parent_path, parent_measurements_path, frames_path, measurements_path, o
     if sha(parent_measurements_path) != parent.payload["provenance"]["measurements_sha256"]:
         raise ValueError("Parent measurement checksum mismatch")
     original = json.loads(parent_measurements_path.read_text())
+    if any(set(original[role]) != set(measurements[role])
+           for role in ("fit_frame_indices", "check_frame_indices")):
+        raise ValueError("Parent fit/check frame roles must remain unchanged")
     if (len(original["references"]) != 1 or original["references"][0] not in measurements["references"]
             or original["references"][0]["chart"] not in ("left", "right")):
         raise ValueError("The original observed end must remain unchanged in the shared fit")
@@ -47,6 +51,7 @@ def run(parent_path, parent_measurements_path, frames_path, measurements_path, o
         raise ValueError("Invalid propagation configuration")
     rows = manifest["frames"]
     positions = {row["index"]: i for i, row in enumerate(rows)}
+    source_times = {i: row["source_pts"]*Fraction(row["source_time_base"]) for i, row in enumerate(rows)}
     if len(parent.payload["frames"]) != len(rows):
         raise ValueError("Parent frame coverage differs from the source manifest")
     for a, b in zip(parent.payload["frames"], rows):
@@ -54,7 +59,7 @@ def run(parent_path, parent_measurements_path, frames_path, measurements_path, o
             raise ValueError("Parent is bound to a different exact source frame")
     gauge = positions[original["references"][0]["frame_index"]]
     paint_indices = [positions[ref["frame_index"]] for ref in measurements["references"]]
-    targets = sorted(set(range(0, len(rows), reference_stride)) | set(paint_indices) | {len(rows)-1})
+    targets = image_anchor_positions(rows, measurements, reference_stride)
     seed = recovery.matrix(parent.charts[0]["field_to_reference"])
     if not np.allclose(parent.payload["frames"][gauge]["reference_to_native"], np.eye(3), atol=1e-8):
         raise ValueError("Single-end parent must retain its declared image gauge")
@@ -100,18 +105,19 @@ def run(parent_path, parent_measurements_path, frames_path, measurements_path, o
     def register(a, b):
         return recovery.register_reference(cache[a], cache[b], rows[b]["native_size"])
 
-    registered, paths, attempts = independent_reference_connections(gauge, paint_indices, targets, register)
+    registered, paths, attempts = independent_reference_connections(
+        gauge, paint_indices, targets, register, times=source_times)
     write(output/"image-connections.json", dict(gauge_frame_index=rows[gauge]["index"], paths=paths,
           index_space="positions in the frozen source manifest", attempts=attempts,
           transforms={i: h.tolist() for i, h in registered.items()}))
     if any(i not in registered for i in paint_indices):
         raise ValueError("A source-fit reference has no independently checked image connection")
     observations, drift_paths, drift_attempts = independent_drift_observations(
-        gauge, paint_indices, targets, registered, paths, register)
+        gauge, paint_indices, targets, registered, paths, register, times=source_times)
     transforms, drift = recovery.smooth_reference_drift(
         [np.array(f["reference_to_native"]) for f in parent.payload["frames"]],
         [observations.get(i) for i in range(len(rows))],
-        [float(row["source_pts"]*Fraction(row["source_time_base"])) for row in rows], gauge)
+        [float(source_times[i]) for i in range(len(rows))], gauge)
     write(output/"image-motion.json", dict(reference_to_native=[h.tolist() for h in transforms],
           drift=drift, paths=drift_paths, attempts=drift_attempts,
           method="independent source-image drift refinement of immutable parent motion; failed adjacent-step warnings persist"))
@@ -148,6 +154,8 @@ def run(parent_path, parent_measurements_path, frames_path, measurements_path, o
                  reference_polynomial=poly, spatial_boundary=None, temporal_boundary=None)
         p["provenance"].update(parent_atlas_sha256=sha(parent_path), measurements_sha256=sha(measurements_path),
             fit_frame_indices=measurements["fit_frame_indices"],
+            fitting_frames=parent.payload["provenance"].get("fitting_frames", []) +
+                fitting_frame_bindings(manifest, [rows[i]["index"] for i in targets]),
             source_fit_reference_indices=[ref["frame_index"] for ref in fit_views],
             image_motion_sha256=sha(output/"image-motion.json"), runner_sha256=sha(__file__),
             note="Shared end/mid source fit; check paint excluded. Old geometric and source-fit warnings are recomputed; original failed adjacent-motion warnings persist.")

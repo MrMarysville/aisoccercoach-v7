@@ -132,10 +132,20 @@ def run_reanchor(tmp_path, raw, direction, output, references=None):
 def test_resumed_and_uninterrupted_reanchor_equivalent_with_immutable_parent(tmp_path, monkeypatch, direction, v7):
     roots = [tmp_path / name for name in ("full", "resumed")]
     outputs = []
+    bounded_correction = reanchor.bounded_correction
     for root, resume in zip(roots, (False, True)):
         root.mkdir()
         raw = prepare_run(root, monkeypatch, resumed=resume, v7=v7)
         parents = {p: (p.read_bytes(), p.stat().st_mtime_ns) for p in [root / "atlas.json", *raw.glob("progress-*/*.json")]}
+        if v7:
+            gauge_transform = r.matrix(r.RecoveryAtlas.load(root / "atlas.json").payload["frames"][0]["reference_to_native"])
+            def check_observations(atlas, records, observations, times, boundary_index, grid):
+                for i, (record, observation) in enumerate(zip(records, observations)):
+                    if observation is not None:
+                        expected = gauge_transform if i == boundary_index else r.normalize_h(translation(record["index"]) @ gauge_transform)
+                        np.testing.assert_allclose(observation, expected, rtol=0, atol=1e-12)
+                return bounded_correction(atlas, records, observations, times, boundary_index, grid)
+            monkeypatch.setattr(reanchor, "bounded_correction", check_observations)
         report = run_reanchor(root, raw, direction, root / "reanchored")
         assert report["boundary_mapping_unchanged"] and report["frame_count"] == 3
         for p, (data, mtime) in parents.items():
@@ -222,11 +232,15 @@ def test_check_plan_keeps_missing_portions_ambiguous_groups_and_missing_maps(tmp
     r.RecoveryAtlas.from_payload(missing).save(tmp_path / "missing-map.json")
     result = score(tmp_path / "missing-map.json", frames_path, checks_path, tmp_path / "missing-score.json", check_plan=plan_path)
     assert result["passing_marking_frames"] == 0
-    reused = deepcopy(atlas.payload)
-    reused["provenance"] = dict(fitting_frames=[rows[1]])
-    r.RecoveryAtlas.from_payload(reused).save(tmp_path / "fitted.json")
-    with pytest.raises(ValueError, match="fitting evidence"):
-        score(tmp_path / "fitted.json", frames_path, checks_path, tmp_path / "invalid.json", check_plan=plan_path)
+    provenance = dict(fitting_frames=[rows[1]])
+    for depth in range(3):
+        reused = deepcopy(atlas.payload)
+        reused["provenance"] = provenance
+        fitted_path = tmp_path / f"fitted-{depth}.json"
+        r.RecoveryAtlas.from_payload(reused).save(fitted_path)
+        with pytest.raises(ValueError, match="fitting evidence"):
+            score(fitted_path, frames_path, checks_path, tmp_path / f"invalid-{depth}.json", check_plan=plan_path)
+        provenance = dict(parent_provenance=provenance)
 
 
 def test_reviewed_reference_switch_and_failed_bridge_remain_explicit(tmp_path, monkeypatch):

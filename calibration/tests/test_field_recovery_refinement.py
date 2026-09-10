@@ -61,6 +61,8 @@ class RefinementTests(unittest.TestCase):
             parent = r.RecoveryAtlas.load(root/'parent.json')
             new = r.RecoveryAtlas.load(root/'candidate/atlas.json')
             self.assertEqual(len(result['temporal_observations']), 6)
+            self.assertEqual([f['source_pts'] for f in new.payload['provenance']['fitting_frames']],
+                             [9000*i for i in range(6)])
             self.assertEqual(new.payload['charts'], parent.payload['charts'])
             for a, b in zip(parent.payload['frames'], new.payload['frames']):
                 self.assertEqual(a['reference_to_native'], b['reference_to_native'])
@@ -84,6 +86,20 @@ class RefinementTests(unittest.TestCase):
             (root/'revised.json').write_text(json.dumps(revised))
             with self.assertRaisesRegex(ValueError, 'change fitted chart'):
                 refine(root/'parent.json', root/'frames.json', root/'revised.json', root/'rejected2', render=False)
+            revised['references'] = []
+            revised['fit_frame_indices'].append(6)
+            revised['check_frame_indices'] = []
+            (root/'revised.json').write_text(json.dumps(revised))
+            with self.assertRaisesRegex(ValueError, 'frozen parent fit/check split'):
+                refine(root/'parent.json', root/'frames.json', root/'revised.json', root/'relabelled', render=False)
+            self.assertFalse((root/'relabelled').exists())
+            revised.update(fit_frame_indices=list(range(6)), check_frame_indices=[6], boundary_observations=[])
+            manifest['frames'][0]['index'], manifest['frames'][6]['index'] = 6, 0
+            (root/'reindexed-frames.json').write_text(json.dumps(manifest))
+            (root/'revised.json').write_text(json.dumps(revised))
+            with self.assertRaisesRegex(ValueError, 'Parent exact frame mismatch: index'):
+                refine(root/'parent.json', root/'reindexed-frames.json', root/'revised.json', root/'reindexed', render=False)
+            self.assertFalse((root/'reindexed').exists())
 
     def test_boundary_revision_preserves_explicit_single_chart_mode(self):
         with tempfile.TemporaryDirectory() as tmp:

@@ -52,7 +52,7 @@ def load_inputs(frames_path, measurements_path):
     check = set(measurements["check_frame_indices"])
     if not fit or fit & check or not (fit | check) <= set(by_index):
         raise ValueError("Declare nonempty fit frames and disjoint existing check frames")
-    for ref in measurements["references"]:
+    for ref in measurements["references"] + measurements.get("boundary_observations", []):
         if ref["frame_index"] not in fit:
             raise ValueError("Reference fit attempted outside declared fit-frame split")
         row = by_index[ref["frame_index"]]
@@ -67,7 +67,21 @@ def load_inputs(frames_path, measurements_path):
     return manifest, measurements, by_index
 
 
-def independent_reference_connections(gauge_index, paint_indices, image_anchor_indices, register):
+def image_anchor_positions(rows, measurements, reference_stride):
+    positions = {row["index"]: i for i, row in enumerate(rows)}
+    fit = {positions[i] for i in measurements["fit_frame_indices"]}
+    return sorted((set(range(0, len(rows), max(reference_stride, 1))) & fit) |
+                  {positions[r["frame_index"]] for r in measurements["references"]} | {max(fit)})
+
+
+def fitting_frame_bindings(manifest, indices):
+    indices = set(indices)
+    return [dict(source_sha256=manifest["source"]["sha256"],
+                 **{k: row[k] for k in ("source_pts", "source_time_base", "image_sha256", "native_size")})
+            for row in manifest["frames"] if row["index"] in indices]
+
+
+def independent_reference_connections(gauge_index, paint_indices, image_anchor_indices, register, *, times=None):
     """Connect image anchors directly, then paint references through one measured hop.
 
     Adjacent accumulation is deliberately absent from this function. Every edge
@@ -76,6 +90,7 @@ def independent_reference_connections(gauge_index, paint_indices, image_anchor_i
     consistency and summed check medians break ties. No paint errors rank paths.
     """
     transforms = {gauge_index: np.eye(3)}
+    distance = lambda a, b: abs(a-b) if times is None else abs(times[a]-times[b])
     paths = {gauge_index: dict(path=[gauge_index], kind="gauge", cost=None)}
     attempts, direct_stats = [], {}
     for i in sorted(set(paint_indices) | set(image_anchor_indices)):
@@ -93,7 +108,7 @@ def independent_reference_connections(gauge_index, paint_indices, image_anchor_i
         if i in direct:
             continue
         candidates = []
-        for j in sorted(set(direct)-{gauge_index}, key=lambda j: (abs(j-i), j)):
+        for j in sorted(set(direct)-{gauge_index}, key=lambda j: (distance(j, i), j)):
             h, stats = register(j, i)
             attempts.append(dict(from_index=j, to_index=i, role="paint_reference_bridge", **stats))
             if h is None:
@@ -103,7 +118,7 @@ def independent_reference_connections(gauge_index, paint_indices, image_anchor_i
                         bottleneck_check_consistent_fraction=min(first["check_consistent_fraction"], stats["check_consistent_fraction"]),
                         total_check_median_px=first["check_median_px"]+stats["check_median_px"])
             rank = (-cost["bottleneck_inlier_hull_fraction"], -cost["bottleneck_check_consistent_fraction"],
-                    cost["total_check_median_px"], abs(j-i), j)
+                    cost["total_check_median_px"], distance(j, i), j)
             candidates.append((rank, recovery.normalize_h(h @ direct[j]), j, cost))
         if candidates:
             _, h, j, cost = min(candidates, key=lambda x: x[0])
@@ -113,7 +128,7 @@ def independent_reference_connections(gauge_index, paint_indices, image_anchor_i
 
 
 def independent_drift_observations(gauge_index, paint_indices, image_anchor_indices,
-                                   registered, connection_paths, register):
+                                   registered, connection_paths, register, *, times=None):
     """Use the closest connected paint view, while keeping gauge bridge evidence.
 
     Direct gauge matches establish independent connections; their availability
@@ -121,13 +136,14 @@ def independent_drift_observations(gauge_index, paint_indices, image_anchor_indi
     connection path cannot register back through that reference and form a loop.
     """
     paint = sorted(set(paint_indices) & set(registered))
+    distance = lambda a, b: abs(a-b) if times is None else abs(times[a]-times[b])
     observations, paths, attempts = {}, {}, []
     for i in image_anchor_indices:
         if i in paint:
             observations[i] = registered[i]
             paths[i] = deepcopy(connection_paths[i])
             continue
-        for j in sorted(paint, key=lambda j: (abs(j-i), j)):
+        for j in sorted(paint, key=lambda j: (distance(j, i), j)):
             if i in connection_paths[j]["path"]:
                 attempts.append(dict(from_index=j, to_index=i, role="drift_route_skipped",
                                      image_registration_pass=False, reason="target_already_on_reference_connection_path"))
@@ -159,8 +175,8 @@ def run(frames_path, measurements_path, out, *, render=True, reference_stride=10
     cv2.setNumThreads(4)
     rows = manifest["frames"]
     positions = {r["index"]: i for i, r in enumerate(rows)}
-    targets = sorted(set(range(0, len(rows), max(reference_stride, 1))) |
-                     {positions[r["frame_index"]] for r in measurements["references"]} | {len(rows)-1})
+    source_times = {i: r["source_pts"]*Fraction(r["source_time_base"]) for i, r in enumerate(rows)}
+    targets = image_anchor_positions(rows, measurements, reference_stride)
     def write(name, value):
         (out/name).write_text(json.dumps(value, indent=2, allow_nan=False)+"\n")
     def read(row):
@@ -179,6 +195,7 @@ def run(frames_path, measurements_path, out, *, render=True, reference_stride=10
           frames_sha256=hashlib.sha256(frames_path.read_bytes()).hexdigest(),
           fit_frame_indices=measurements["fit_frame_indices"], check_frame_indices=measurements["check_frame_indices"],
           image_anchor_frame_indices=[rows[i]["index"] for i in targets],
+          reference_distance="elapsed source time; image anchors restricted to declared fit frames",
           projection_mode=(recovery.SINGLE_REFERENCE_PROJECTION_MODE if len(measurements["references"]) == 1
                            else recovery.V7_PROJECTION_MODE),
           motion_reference_method="direct gauge registrations, one measured bridge per disconnected paint reference, then nearest connected paint reference for drift; adjacent-only chart fallback is not independent evidence",
@@ -229,7 +246,7 @@ def run(frames_path, measurements_path, out, *, render=True, reference_stride=10
     def register(a, b):
         return recovery.register_reference(cache[a], cache[b], rows[b]["native_size"])
     independently_registered, reference_paths, attempts = independent_reference_connections(
-        gauge_index, actual_refs, targets, register)
+        gauge_index, actual_refs, targets, register, times=source_times)
     direct_stats = [dict(from_frame_index=rows[s["from_index"]]["index"], frame_index=rows[s["to_index"]]["index"],
                          **{k:v for k,v in s.items() if k not in ("from_index", "to_index")}) for s in attempts]
     # A usable adjacent route can transport a chart for diagnostics, but cannot
@@ -245,13 +262,13 @@ def run(frames_path, measurements_path, out, *, render=True, reference_stride=10
         for warning in warnings:
             warning.append("gauge_paint_fit_exceeds_6px_p95")
     observations, drift_paths, drift_attempts = independent_drift_observations(
-        gauge_index, actual_refs, targets, independently_registered, reference_paths, register)
+        gauge_index, actual_refs, targets, independently_registered, reference_paths, register, times=source_times)
     independent = [observations.get(i) for i in range(len(rows))]
     direct_stats.extend(dict(from_frame_index=rows[s["from_index"]]["index"], frame_index=rows[s["to_index"]]["index"],
                              **{k:v for k,v in s.items() if k not in ("from_index", "to_index")}) for s in drift_attempts)
     for i in targets:
         print(f"independent image reference {i}: {'available' if independent[i] is not None else 'unavailable'}", flush=True)
-    times = [float(r["source_pts"]*Fraction(r["source_time_base"])) for r in rows]
+    times = [float(t) for t in source_times.values()]
     transforms, drift = recovery.smooth_reference_drift(accumulated, independent, times, gauge_index)
     for i in drift["unsupported_indices"]:
         warnings[i].append("no_independent_slow_drift_support")
@@ -274,7 +291,10 @@ def run(frames_path, measurements_path, out, *, render=True, reference_stride=10
                    field=recovery.FIELD, blend=measurements.get("blend", recovery.BLEND), charts=charts,
                    protected_y_m=-recovery.BOX18_HALF_W, spatial_boundary=None, temporal_boundary=None,
                    frames=frame_records, provenance=dict(measurements_sha256=hashlib.sha256(measurements_path.read_bytes()).hexdigest(),
-                                                       fit_frame_indices=measurements["fit_frame_indices"]))
+                                                       fit_frame_indices=measurements["fit_frame_indices"],
+                                                       fitting_frames=fitting_frame_bindings(manifest,
+                                                           {rows[i]["index"] for i in targets} | {r["frame_index"]
+                                                               for r in measurements.get("boundary_observations", [])})))
     boundary = []
     # Extra boundary observations are accepted only on designated fit frames.
     for ref in measurements["references"] + measurements.get("boundary_observations", []):

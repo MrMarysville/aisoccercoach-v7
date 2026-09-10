@@ -18,6 +18,7 @@ from scipy.optimize import least_squares
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 import field_recovery as recovery
+from calibration.tools.fit_field_recovery import fitting_frame_bindings
 
 
 def sha(path):
@@ -151,7 +152,10 @@ def refine(parent_path, frames_path, measurements_path, output, *, render=True,
     if (measurements.get("parent_measurements_sha256") != parent_inputs_hash or
             not input_path or sha(input_path) != parent_inputs_hash):
         raise ValueError("Near refinement must bind unchanged parent input bytes")
-    if "references" in measurements and measurements["references"] != json.loads(Path(input_path).read_text()).get("references"):
+    parent_inputs = json.loads(Path(input_path).read_text())
+    if any(set(measurements[k]) != set(parent_inputs[k]) for k in ("fit_frame_indices", "check_frame_indices")):
+        raise ValueError("Near refinement must preserve the frozen parent fit/check split")
+    if "references" in measurements and measurements["references"] != parent_inputs.get("references"):
         raise ValueError("Near-only refinement cannot change parent chart inputs")
     saved = {f["index"]:f for f in payload["frames"]}
     rows = {}
@@ -238,6 +242,8 @@ def refine(parent_path, frames_path, measurements_path, output, *, render=True,
     write("declaration.json", declaration)
     # Add provenance without replacing the parent fit-input binding.
     payload.setdefault("provenance", {})["near_boundary_refinement"] = declaration
+    evidence = payload["provenance"].setdefault("fitting_frames", [])
+    evidence.extend(row for row in fitting_frame_bindings(manifest, grouped) if row not in evidence)
     atlas = recovery.RecoveryAtlas.from_payload(payload)
     gx, gy = np.meshgrid(np.linspace(-recovery.HALF_L, recovery.HALF_L, 181), np.linspace(-recovery.HALF_W, recovery.HALF_W, 107))
     grid = np.c_[gx.ravel(), gy.ravel()]

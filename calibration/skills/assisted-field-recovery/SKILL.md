@@ -163,6 +163,14 @@ Preserve every-tenth-frame plus last-frame fitting eligibility and inherited
 exact-PTS roles. Refit boundary coefficients and time splines from current footage;
 never copy a previous clip's fitted spline or extrapolate it into an extension.
 
+Fresh fitting and shared-reference fitting intersect image-anchor sampling with
+the declared fit split. For a mixed-cadence source manifest, `--reference-stride 1`
+uses every eligible fitting view while leaving check frames out of the anchor
+set. References are ranked by rational source time. New atlases preserve exact
+fitting-frame bindings through propagation and boundary refinements; frozen-plan
+scoring rejects fitting evidence inherited through parent revisions as checks.
+Boundary-only revisions must preserve the parent's source-bound fit/check roles.
+
 Freeze recipe/helper/input hashes and copies of the exact helper files in the
 new attempt directory before fitting. Preserve the old files before changing
 code for a subsequent attempt.

@@ -15,7 +15,7 @@ import cv2
 import numpy as np
 
 from calibration import field_recovery as recovery
-from calibration.tools.fit_field_recovery import load_inputs
+from calibration.tools.fit_field_recovery import fitting_frame_bindings, load_inputs
 
 
 def sha(path):
@@ -41,12 +41,14 @@ def refine(parent_path, frames_path, measurements_path, output, *, render=True, 
     if not parent_inputs_path or sha(parent_inputs_path) != measurements['parent_measurements_sha256']:
         raise ValueError('Frozen parent input file missing or changed')
     parent_inputs = json.loads(Path(parent_inputs_path).read_text())
+    if any(set(measurements[k]) != set(parent_inputs[k]) for k in ('fit_frame_indices', 'check_frame_indices')):
+        raise ValueError('Boundary refinement must preserve the frozen parent fit/check split')
     if measurements['references'] != parent_inputs['references']:
         raise ValueError('Boundary-only refinement cannot silently change fitted chart inputs')
     if len(payload['frames']) != len(manifest['frames']):
         raise ValueError('Parent/source frame coverage mismatch')
     for saved, row in zip(payload['frames'], manifest['frames']):
-        for key in ('source_pts', 'source_time_base', 'native_size', 'image_sha256'):
+        for key in ('index', 'source_pts', 'source_time_base', 'native_size', 'image_sha256'):
             if saved[key] != row[key]:
                 raise ValueError(f'Parent exact frame mismatch: {key}')
     if output.exists():
@@ -130,6 +132,8 @@ def refine(parent_path, frames_path, measurements_path, output, *, render=True, 
         parent_measurements_sha256=measurements['parent_measurements_sha256'],
         measurements_sha256=sha(measurements_path), image_motion_recomputed=False,
         chart_fits_recomputed=False, refinement_helper_sha256=sha(__file__))
+    evidence = payload['provenance'].setdefault('fitting_frames', [])
+    evidence.extend(row for row in fitting_frame_bindings(manifest, grouped) if row not in evidence)
     atlas = recovery.RecoveryAtlas.from_payload(payload)
     gx, gy = np.meshgrid(np.linspace(-recovery.HALF_L, recovery.HALF_L, 181),
                          np.linspace(-recovery.HALF_W, recovery.HALF_W, 107))
