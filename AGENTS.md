@@ -4,6 +4,11 @@ Read `CURRENT-WORK.md` and `README.md` before choosing work. This repository is
 only the v7-based assisted field-alignment workflow. The old repositories and
 worktrees are preserved history, not additional active apps.
 
+- For frame markup, fitting or recovery, follow
+  [assisted-field-recovery](calibration/skills/assisted-field-recovery/SKILL.md).
+  Preserve the original v7 local-chart and boundary-correction workflow; a
+  single-reference polynomial candidate is a separate experiment. The repository
+  skill is authoritative even when an agent has older installed instructions.
 - Keep the owner-confirmed field fixed at 120 × 70 yd (109.728 × 64.008 m).
   Preserve its provenance and distinguish assumed markings from measurements.
 - No real footage, frames, screenshots or identifiable children in Git. Use

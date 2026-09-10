@@ -31,10 +31,90 @@ qualified. Full-game accuracy, physical metric accuracy and production runtime
 remain unverified. All four reserved evaluation windows remain closed; their
 exact plan is `data/development-plan.json`.
 
-Next: rerun the latest source-time reference-selection fix, finish transition
-checks and full-sequence review, and issue the final qualification receipts.
+Next: restore the successful v7 method as the explicit development baseline;
+the newer single-reference extension experiment is a different model, not a
+qualification of the original three-chart v7 setup. See the setup audit below
+before continuing the saved re-anchoring experiment.
 App orchestration and automatic initialization follow calibration qualification.
 Tracking, identity and analytics remain outside current scope.
+
+Handoff order: read `AGENTS.md`, this status, `README.md`, then
+`calibration/skills/assisted-field-recovery/SKILL.md`. The repository skill carries
+the complete frame-markup/v7 recipe without requiring the workstation's personal
+skill registrations. Updating that recipe has not adapted the extension runner
+or qualified the four minute-long sequences. Older results below retain their
+dated implementation and model scope; they are not the latest v7 acceptance state.
+
+## Original v7 setup comparison — 2026-09-10
+
+The frame-markup skill has also been recovered from the historical propagation
+checkout and updated at `calibration/skills/assisted-field-recovery/SKILL.md`.
+It now uses the active checkout/interpreter, actual browser pointer annotations,
+native-paint refinement and semantic review, then the original v7 local-chart,
+slow-drift and spatial/temporal boundary workflow. It explicitly distinguishes
+the single-reference polynomial experiment and preserves the frozen evidence
+requirements. On this workstation, the installed `assisted-field-recovery` entry links to this
+maintained project copy; `soccer-field-alignment` routes to it, and the generic
+OpenCV skill no longer overrides an owner-selected nonlinear model with a
+mandatory single homography. Historical skill files remain unchanged.
+
+Skill validation and all nine documented CLI help checks passed. The 39 focused
+annotation, paint/turf, assembly and v7 projection checks passed in 8.75 seconds.
+A desktop Chromium smoke check at 1440 × 1000 exercised actual pointer markup,
+Undo, two successive saves and reopening on a copied eligible Granite fit frame
+(source PTS 207000360 at 1/90000, 2300.004 s). Three coarse native points produced
+102/102 sampler-selected near-touchline points; source and measured imagery were
+reviewed, and assembly retained the reviewed feature with exact source binding.
+The browser's measured-overlay view also loaded with its image hash and saved
+revision preserved; both browser passes had no console/page errors.
+This is a markup/measurement integration check on one marking, not a new complete
+v7 fit or an independent accuracy result. Private browser scripts, screenshots,
+annotations, measurements and receipts are under
+`/tmp/v7-frame-markup-20260910-h6o5zrag/`. Browser plugin was unavailable; the
+existing local Playwright/Chromium installation was used. No dependencies,
+calibration algorithms, owner maps or development/check assignments were changed.
+The temporary annotation/review server was stopped after verification.
+
+The owner reaffirmed that development should use the successful v7 setup from
+`aisoccercoach-repo/v2`. Read-only comparison found an experiment-path mismatch,
+not a corrupted migration. The original `rough-motion-v7` combines separately
+fitted left/midfield/right charts, measured image motion with 0.75-second drift
+smoothing, a spatial far-boundary correction and a fitted temporal far-boundary
+correction. Those temporal parameters belong only to its 620.033333–655.033333 s
+Granite development episode; do not extrapolate them onto other footage.
+
+Using the current converter/evaluator on the frozen original artifacts reproduced
+**351,000 projections (351 frames × 1,000 field points) with exactly 0.0 native px
+difference** from the original v7 evaluator. All 14 migrated private review files
+also remain byte-identical to their original files and migration hashes. The
+Granite editor's embedded parent retains `v7_fixed_blend_v1`, three charts, and
+its later reviewed boundary refinements. The editor baseline is preserved.
+
+The minute-extension parents instead use `polynomial_reference_residual_v1`:
+one chart with a shared degree-3 polynomial for Granite and degree-2 for Butte,
+with no separate spatial or temporal far-boundary model. They come from later
+opposite-half development work, not the original preview. In addition,
+`reanchor_field_recovery.run` explicitly requires exactly one chart, so it cannot
+currently extend the original three-chart v7 setup. Its 12 px bounded correction
+experiment must not be described as the same configuration or as proof that the
+original v7 method fails. The generic v7 fitter and boundary-refinement helpers
+are already present; no replacement solver is needed merely to recover them.
+
+Next establish a control using the v7 fitting workflow on the unchanged allowed
+development footage, with fresh source-reviewed references and boundary evidence
+where visible. Missing required views remain unsupported; never manufacture a
+third chart or copy the old episode's fitted time spline. Review the extension
+runner's single-chart/gauge assumptions before adapting that path. Retain the
+single-reference candidates and their failures as a separate comparison, with
+the frozen fit/check roles, missing evidence and reserved-window restrictions.
+
+This audit changes no mapping or owner revision and makes no new paint-accuracy
+claim. The original preview remains a 35.1-second development result; it does not
+establish accuracy on the four minute extensions. Reproducible local check:
+`OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1 .venv/bin/python -B out/v7-setup-audit-20260910/check_v7_parity.py`.
+Measured receipt: `out/v7-setup-audit-20260910/comparison-526jgnz7/report.json`.
+All audit inputs/outputs remain private and ignored; historical files were read
+without executing their fitting/rendering scripts or modifying their artifacts.
 
 ## Independently checked re-anchoring — 2026-09-10 progress checkpoint
 
@@ -102,15 +182,19 @@ and runnable experiment scripts are ignored under `out/reanchor-20260910/`;
 
 Future work, in order:
 
-1. Run the current source-time-aware correction on all four unchanged sequences,
-   using the reviewed references, and compare resumed/uninterrupted corrected maps.
-2. Freeze and measure the actual transition neighbors, resolving source-only paint
+1. Establish the original v7 method as the explicit control, following the setup
+   audit above. Resolve the extension runner's one-chart assumption before
+   treating an extension experiment as a test of that method.
+2. For the retained single-reference comparison, run the current source-time-aware
+   correction on all four unchanged sequences using the reviewed references,
+   and compare resumed/uninterrupted corrected maps.
+3. Freeze and measure the actual transition neighbors, resolving source-only paint
    coverage where possible without removing failed groups or relabeling checks.
    Render and review complete comparisons; issue hash-bound qualification receipts.
-3. If the fixed parent model still fails, document the residual pattern and next
+4. If a fixed parent model still fails, document the residual pattern and next
    discriminating experiment. Do not automatically add a distortion model or open
    reserved windows. Keep 120 × 70 yd dimensions and their provenance fixed.
-4. After development qualification, integrate assisted reference review and
+5. After development qualification, integrate assisted reference review and
    resumable processing into the existing app. Automatic initialization remains
    a later calibration task; broader product features stay deferred.
 
@@ -143,8 +227,9 @@ Handoff inputs (private paths below are relative to `out/reanchor-20260910/`):
   from the slow optional `--render` pass. Existing experiment scripts document
   prior invocations; do not overwrite their outputs or treat them as the latest run.
 - No experiment jobs remain running at this handoff. App integration and final
-  four-sequence qualification are unfinished; the next agent should start at
-  future-work item 1 above. All footage and experiment artifacts remain local.
+  four-sequence qualification are unfinished; the next agent should first read
+  the original-v7 setup audit and start at future-work item 1 above. All footage
+  and experiment artifacts remain local.
 
 ## Resumable propagation — 2026-09-10
 

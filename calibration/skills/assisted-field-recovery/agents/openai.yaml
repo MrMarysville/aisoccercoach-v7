@@ -1,0 +1,4 @@
+interface:
+  display_name: "Assisted Field Recovery"
+  short_description: "Mark source frames and fit the original v7 field map"
+  default_prompt: "Use $assisted-field-recovery to mark the source frames, refine and review the paint, and fit and independently check the original v7 field-alignment workflow."

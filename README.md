@@ -10,10 +10,12 @@ also supplies pixel-to-field lookup. It runs locally at
 
 Calibration development now includes resumable propagation and a bounded
 re-anchoring CLI. Four 60-second extensions have been processed, with raw resume
-equivalence verified; none is independently qualified yet. The latest reference
-selection fix still needs real-sequence reruns, transition checks and complete
-visual review. See [current results and next work](CURRENT-WORK.md) before using
-an experiment result or planning app integration.
+equivalence verified; none is independently qualified yet. These extensions use
+a later single-reference polynomial model, while the original v7 setup uses
+three local charts and boundary corrections. The original v7 evaluator reproduces
+exactly after migration; the extension runner currently accepts only one chart.
+See [the setup comparison and next work](CURRENT-WORK.md) before continuing an
+experiment or planning app integration.
 
 ## Run
 
@@ -70,6 +72,16 @@ source binding and stale-revision checks remain enforced. Previous paint scores
 apply to their parent map; an owner's adjustment requires new independent checks.
 Existing artifact schema/version names are intentionally retained.
 
+For agent-led source-frame markup, use the maintained
+[assisted-field-recovery skill](calibration/skills/assisted-field-recovery/SKILL.md).
+It covers browser pointer annotations, native-paint measurement, semantic review,
+the original v7 chart/boundary fitting recipe and independent checks. This
+repository copy is authoritative and can be read directly by the next agent;
+the current workstation's installed `soccer-field-alignment` skill routes to it.
+Personal skill registrations are local configuration, not part of a fresh clone.
+A separate model invocation is not required for the active agent to mark frames;
+automatic app invocation remains unbuilt.
+
 Run CLI tools from this directory, for example:
 
 ```bash
@@ -84,7 +96,7 @@ Run CLI tools from this directory, for example:
 
 `fit_field_propagation` joins observed end/midfield references using independent
 image connections and a shared bounded residual. `propagate_field_recovery`
-extends an existing fit through time using adjacent motion and a paint lock;
+extends an existing fit through time using adjacent motion and an optional paint lock;
 its paint gauge participates in fitting and is not independent accuracy evidence.
 Both are development tools; automatic full-game execution from the app is unbuilt.
 
@@ -107,7 +119,8 @@ Interrupted frame decoding cannot resume; keep the partial output and start a
 fresh output directory. Processing resumes once a complete frame manifest exists.
 
 `reanchor_field_recovery` corrects slow image-registration drift around a fixed
-parent map. It requires `--atlas`, `--frames` (parent manifest), `--propagation`
+single-chart parent map; it does not yet accept the original three-chart v7 map.
+It requires `--atlas`, `--frames` (parent manifest), `--propagation`
 (completed raw run without paint lock), `--extension-frames`, `--split`, `--plan`,
 `--direction` and a fresh `--out` directory. Use `--turf-profile green_v1` for
 Granite or `warm_green_v1` for Butte, and `--render` for every-frame raw/corrected
