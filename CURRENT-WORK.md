@@ -1,6 +1,6 @@
 # Current work
 
-Updated 2026-09-09. This is the canonical repository for future work.
+Updated 2026-09-10. This is the canonical repository for future work.
 
 The owner wants full-game calibration: a source-bound pixel-to-field mapping
 maintained through both halves, with simple visual corrections, independently
@@ -23,16 +23,172 @@ measured development results preserved in `data/development/propagation-attempt0
 not new migration measurements or untouched holdout results. They have not
 replaced the owner's editor baselines.
 
-The separate 60-second forward/backward propagation experiment uses a paint
-lock. Its sampler gauge is fit evidence, not an independent accuracy certificate;
-the Butte forward extension contains substantial drift. Full-game accuracy,
-physical metric accuracy and processing time remain unverified. All four reserved
-evaluation windows remain closed; their exact plan is `data/development-plan.json`.
+An earlier 60-second propagation experiment used a paint lock; its sampler gauge
+was fitting evidence. The current experiment uses raw adjacent propagation plus
+separate, bounded reference correction and frozen independent paint checks.
+All four minute-long development sequences have been processed, but none has
+qualified. Full-game accuracy, physical metric accuracy and production runtime
+remain unverified. All four reserved evaluation windows remain closed; their
+exact plan is `data/development-plan.json`.
 
-Next: assess the latest opposite-half fits, then extend source-bound mapping
-through longer pans, zooms and reference changes with independent paint checks,
-bounded corrections and resumable processing. Keep geometry/support warnings and
-coverage visible. Tracking, identity and analytics remain outside current scope.
+Next: rerun the latest source-time reference-selection fix, finish transition
+checks and full-sequence review, and issue the final qualification receipts.
+App orchestration and automatic initialization follow calibration qualification.
+Tracking, identity and analytics remain outside current scope.
+
+## Independently checked re-anchoring — 2026-09-10 progress checkpoint
+
+Implemented `reanchor_field_recovery` around the existing registration and
+0.75-second drift helpers. It accepts fitting references but no independent check
+paint. Parent polynomial geometry, observed support and boundary mapping remain
+fixed; 12-native-pixel correction limits, temporal-support gaps and per-frame
+geometry failures remain explicit. Inputs, source identities, fitting roles and
+implementation snapshots are frozen in private artifacts. The scorer's optional
+frozen check plan keeps missing/ambiguous groups in the denominator. A qualification
+receipt helper requires paint, geometry, transition neighbors, visual review and
+resume equivalence; physical certification and full-game acceptance stay false.
+
+All four initial 10-second extensions were independently scored before correction.
+These results use their frozen initial evidence and the saved initial runner:
+
+| Sequence | Raw passing groups | Corrected passing groups | Supported frames |
+| --- | ---: | ---: | ---: |
+| Granite forward | 35/110 | 66/110 | 100/100 |
+| Granite backward | 33/99 | 42/99 | 66/100 |
+| Butte forward | 28/110 | 29/110 | 100/100 |
+| Butte backward | 16/76 | 16/76 | 36/100 |
+
+Expanded the same exact-source windows to 60 seconds in both directions for both
+clips: 2,400 sampled frames at 10 fps. Existing fit/check roles and initial check
+measurements were carried forward by exact PTS. Source-only paint proposals cover
+five-second checks plus drift/reference candidates; rejected samples, uncertain
+labels and unmeasured distant boundaries remain recorded. No reserved footage
+was accessed. Pausing after seven frames and resuming produced exactly equal raw
+maps and diagnostics to uninterrupted processing in all four sequences. Paused
+checkpoint bytes/mtimes and parent atlas/manifest hashes remained unchanged.
+
+The saved `reanchor60-*-v2` development candidates produced these results:
+
+| Sequence | Raw passing groups | Corrected passing groups | Supported frames | Incomplete evidence groups |
+| --- | ---: | ---: | ---: | ---: |
+| Granite forward | 76/294 | 112/294 | 157/600 | 154 |
+| Granite backward | 40/270 | 53/270 | 66/600 | 137 |
+| Butte forward | 47/291 | 66/291 | 574/600 | 176 |
+| Butte backward | 16/242 | 16/242 | 36/600 | 166 |
+
+**These are failed exploratory candidates, not results for the latest runner.**
+Three fresh frame-300 references passed their required paint checks. The Butte
+backward halfway stroke needed a source-only coordinate correction; its revised
+measurements are saved but have not been used in a new run. An earlier narrow
+paint-search attempt was retained; its expensive preview rendering was stopped.
+The revised search uses the existing measurement CLI widths and records source
+occlusion rejections. Independent check measurements were not used to fit maps.
+
+Review also found that dense connection IDs ranked backward references by list
+position instead of elapsed source time. The current runner now uses source-time
+offsets for that ranking. Its focused synthetic checks pass, but the four real
+sequences still need rerunning with this fix. Actual transition-neighbor checks,
+complete comparison review, corrected-map resume equivalence and final combined
+qualification receipts are outstanding. No candidate has been accepted.
+
+Measured v2 correction runtime was 87.6–97.5 seconds per 600-frame sequence,
+excluding preview rendering. Raw pause+resume took 14.6–15.2 minutes per clip
+(both directions, including decoding); uninterrupted repeats took 29.3–32.2
+minutes while competing with other local work. These are measured experiment
+times, not a production throughput benchmark. Evidence, source reviews, hashes
+and runnable experiment scripts are ignored under `out/reanchor-20260910/`;
+`protocol.json` binds windows and preserved editor artifacts, and the two
+`*-raw60-equivalence.json` files record the completed raw comparisons.
+
+Future work, in order:
+
+1. Run the current source-time-aware correction on all four unchanged sequences,
+   using the reviewed references, and compare resumed/uninterrupted corrected maps.
+2. Freeze and measure the actual transition neighbors, resolving source-only paint
+   coverage where possible without removing failed groups or relabeling checks.
+   Render and review complete comparisons; issue hash-bound qualification receipts.
+3. If the fixed parent model still fails, document the residual pattern and next
+   discriminating experiment. Do not automatically add a distortion model or open
+   reserved windows. Keep 120 × 70 yd dimensions and their provenance fixed.
+4. After development qualification, integrate assisted reference review and
+   resumable processing into the existing app. Automatic initialization remains
+   a later calibration task; broader product features stay deferred.
+
+Validation at this checkpoint: all 195 Python regression tests pass on the current
+source-time-aware implementation, as do all eight focused re-anchor tests,
+three calibration CLI help checks, Python compilation and whitespace checks.
+The frozen plan/catalog, both parent atlas/manifest pairs and all 12 editor
+artifacts in this experiment's preservation manifest still match their hashes.
+No dependencies, licenses, owner revisions or app behavior were changed by
+re-anchoring. Pre-push check logs remain in `out/reanchor-20260910/`.
+
+Handoff inputs (private paths below are relative to `out/reanchor-20260910/`):
+
+- Clip IDs are `13232938-h2-slot1` (Granite, `green_v1`) and
+  `13217031-h1-slot2` (Butte, `warm_green_v1`). `protocol.json` contains the exact
+  parent atlas/manifest paths and guarded extension windows.
+- Both `<clip>-raw60-resumed/` and `<clip>-raw60-uninterrupted/` are complete.
+  Reuse `<clip>-raw60-resumed/frames-<direction>/frames.json` for either run.
+  The expensive raw equivalence experiment does not need repeating.
+- `<clip>-evidence60-<direction>/` holds `split.json`, `frozen-check-plan.json`,
+  `measurements-reviewed.json` and `score-raw.json`. Preserve all inherited groups
+  when adding checks around the newly observed reference transitions.
+- Use `<clip>-references60-<direction>-v2.json`, except Butte backward, which uses
+  `13217031-h1-slot2-references60-backward-v3.json` (reviewed, not yet run).
+  `<clip>-reanchor60-<direction>-v2/` contains the superseded candidate results
+  tabulated above; its embedded implementation snapshot predates the time fix.
+- Start the current CLI with fresh output directories, such as
+  `<clip>-reanchor60-<direction>-source-time-v3/`, and set
+  `OPENBLAS_NUM_THREADS=1 OMP_NUM_THREADS=1`. Keep mapping/scoring runs separate
+  from the slow optional `--render` pass. Existing experiment scripts document
+  prior invocations; do not overwrite their outputs or treat them as the latest run.
+- No experiment jobs remain running at this handoff. App integration and final
+  four-sequence qualification are unfinished; the next agent should start at
+  future-work item 1 above. All footage and experiment artifacts remain local.
+
+## Resumable propagation — 2026-09-10
+
+Re-scored the latest opposite-half candidates with the current evaluator after
+verifying atlas, frame-manifest and check-file hashes against the saved scores.
+Results reproduce exactly: Granite's original checks pass 37/38 marking/frame
+groups, its documented label correction passes 39/39 (median/p95 0.443/1.565 px),
+and Butte passes 41/41 (0.482/1.795 px). Each check set covers six frames. No
+points, labels, thresholds or fit/check roles were changed in this run. Fresh
+score artifacts are under `out/calibration-20260910/assessment/`.
+
+The propagation CLI now saves immutable, hash-linked per-frame maps and
+diagnostics, supports `--max-frames` and `--resume`, and exports a source-bound
+extension atlas when processing completes. Resume checks input/configuration,
+implementation, environment and completed-frame hashes; an output lock prevents
+concurrent writers. Frozen plan/catalog and reserved-window checks apply to
+reused frames too. Parent fit/check provenance stays explicitly attached to the
+parent manifest. Paused or missing diagnostic samples cannot claim whole-window
+survival. Existing warnings and observed-support gates remain active; exports
+are approximate diagnostics and do not enable public lookup or certify accuracy.
+
+Two new 10-second forward extensions were decoded locally after the opposite-half
+clips' last sampled frames. Each contains 100 frames at 10 fps. Pausing after seven frames
+and resuming produced exactly the same frame maps and diagnostics as an
+uninterrupted run. The first checkpoint stayed byte-identical with an unchanged
+modification time. Both extensions had zero failed adjacent-motion steps, but
+direct-to-anchor registration disagreement exceeded the existing 6 px p95 target:
+first at +4.967 s for Granite and +6.967 s for Butte (peaks 6.994 and 6.486 px).
+This diagnoses accumulation drift; it is not an independent paint-accuracy
+measurement. Sparse overlays were inspected. No paint lock or new paint fitting
+was used for these extensions; the four reserved windows and owner editor
+baselines remain unchanged.
+
+Validation: 187 Python tests and nine frontend tests passed, including synthetic
+pause/crash/resume checks in both directions, paint-lock state, failed motion,
+missing diagnostics, changed evidence/checkpoints, reserved-window rejection and
+concurrent-writer rejection. Python syntax, CLI help and whitespace checks passed.
+Final real-frame verification is recorded in
+`out/calibration-20260910/final/resume-verification.json`.
+The exact tested runner is retained beside that receipt; the subsequent
+paint-lock warning-inheritance fix passed the focused synthetic checks.
+Full-game runtime/accuracy remain unverified. An interrupted decode still needs
+a fresh output directory; resumable processing begins with a complete frame
+manifest. No dependency or license changes were needed.
 
 ## Repository migration
 

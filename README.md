@@ -8,6 +8,13 @@ compare the original, seek the clip and save an adjustment. The saved mapping
 also supplies pixel-to-field lookup. It runs locally at
 **http://127.0.0.1:3100/alignment**.
 
+Calibration development now includes resumable propagation and a bounded
+re-anchoring CLI. Four 60-second extensions have been processed, with raw resume
+equivalence verified; none is independently qualified yet. The latest reference
+selection fix still needs real-sequence reruns, transition checks and complete
+visual review. See [current results and next work](CURRENT-WORK.md) before using
+an experiment result or planning app integration.
+
 ## Run
 
 Requirements: Node.js 22+, pnpm 10.28.2, Python 3.11 or 3.12, and local
@@ -71,6 +78,7 @@ Run CLI tools from this directory, for example:
 .venv/bin/python -m calibration.tools.fit_field_recovery --help
 .venv/bin/python -m calibration.tools.fit_field_propagation --help
 .venv/bin/python -m calibration.tools.propagate_field_recovery --help
+.venv/bin/python -m calibration.tools.reanchor_field_recovery --help
 .venv/bin/python -m calibration.tools.score_field_recovery --help
 ```
 
@@ -79,6 +87,70 @@ image connections and a shared bounded residual. `propagate_field_recovery`
 extends an existing fit through time using adjacent motion and a paint lock;
 its paint gauge participates in fitting and is not independent accuracy evidence.
 Both are development tools; automatic full-game execution from the app is unbuilt.
+
+Propagation saves each completed frame's mapping and diagnostics atomically.
+Use `--max-frames N` to pause after N additional frames per direction, then repeat
+the same command with `--resume` to continue (omit `--max-frames` to finish).
+Resume requires the same atlas, source manifests, frozen plan/catalog, settings
+and implementation. Completed checkpoints are immutable, changed inputs are
+rejected, and a local file lock prevents concurrent writers to the same output.
+The default catalog is `data/game-sources.json`; select another with `--catalog`.
+Reserved-window guards also apply when using `--reuse-frames`.
+
+`report.json` distinguishes paused from completed processing. On completion,
+`atlas-forward.json` and/or `atlas-backward.json` contain the extension maps with
+exact source PTS and frame hashes, the parent's geometry/support and all inherited
+and propagation warnings. These are diagnostic maps: warnings still block public
+lookup, `metric_certified` stays false, and independent paint checks remain
+necessary. Missing diagnostic samples cannot count as whole-window survival.
+Interrupted frame decoding cannot resume; keep the partial output and start a
+fresh output directory. Processing resumes once a complete frame manifest exists.
+
+`reanchor_field_recovery` corrects slow image-registration drift around a fixed
+parent map. It requires `--atlas`, `--frames` (parent manifest), `--propagation`
+(completed raw run without paint lock), `--extension-frames`, `--split`, `--plan`,
+`--direction` and a fresh `--out` directory. Use `--turf-profile green_v1` for
+Granite or `warm_green_v1` for Butte, and `--render` for every-frame raw/corrected
+comparison images. Optional `--references` supplies reviewed fitting paint;
+this CLI accepts no independent check-paint input.
+
+Registration uses eligible fitting views at one-second intervals, 1920-pixel
+width and the existing 0.75-second drift smoother. Nearest-reference selection
+uses elapsed source time in both directions. A new reference must connect
+directly or through one checked image bridge and pass its required named-paint
+checks (median ≤3 px, p95 ≤6 px). Corrections exceeding 12 native pixels over the
+visible observed-support grid, missing temporal brackets longer than 1.1 seconds,
+or invalid geometry leave the raw map in place and mark the frame unsupported.
+The original boundary map, polynomial model, dimensions, support and warnings
+remain attached. Output includes `atlas.json`, `reference-connections.json`,
+per-frame bounds/geometry/support in `report.json`, and frozen input and
+implementation hashes with a source snapshot in `declaration.json`.
+
+The split and optional references use checksum envelopes with `schema`, `payload`
+and `payload_sha256` (the existing `field_recovery.digest`):
+
+- `field-recovery-reanchor-split-v1`: source/manifest hashes and every exact frame
+  identity with `role: fit|check`. Every tenth frame and the last are fit-eligible;
+  `inherited_splits` entries (`path`, `sha256`) preserve earlier roles by exact PTS.
+- `field-recovery-reanchor-references-v1`: source/manifest/split hashes and
+  `references`, each with the exact fitting frame identity,
+  `review_status: source_reviewed`, `required_labels`, and named `features`
+  (`feature_id`, `label`, `points_native`). Missing or failed paint rejects an anchor.
+- `field-recovery-check-plan-v1`: source/manifest hashes, disjoint complete
+  `fit_frame_indices`/`check_frame_indices`, and required `groups`, each with
+  `frame_index`, exact frame identity, `label`, `feature_ids` and
+  `observation_status`. Exact identity includes source PTS/time base, image hash
+  and native size. Missing/ambiguous portions remain in the required groups.
+
+Pass this last artifact to `score_field_recovery --check-plan`. Required missing
+groups, unreviewed measurements and absent maps fail; registration fitting views
+cannot become independent checks. Without that option, legacy scoring is retained.
+The scorer's `qualification_receipt(...)` helper combines the score and re-anchor
+report with optional baseline, visual-review and resume-equivalence files. It
+requires complete paint evidence, supported geometry, transition-neighbor checks,
+full-sequence review, equivalent maps and unchanged parents before setting
+`pixel_qualified`. Missing evidence keeps that flag false. Physical metric
+certification and full-game acceptance always remain false.
 
 ## Verify
 
