@@ -13,7 +13,9 @@ re-anchoring CLI. Four 60-second extensions have been processed, with raw resume
 equivalence verified; none is independently qualified yet. These extensions use
 a later single-reference polynomial model, while the original v7 setup uses
 three local charts and boundary corrections. The original v7 evaluator reproduces
-exactly after migration; the extension runner currently accepts only one chart.
+exactly after migration; the extension runner now accepts its three-chart maps
+and rejects missing charts or boundary fits and boundary time extrapolation.
+The fresh v7 control and four-window qualification are still in progress.
 See [the setup comparison and next work](CURRENT-WORK.md) before continuing an
 experiment or planning app integration.
 
@@ -119,7 +121,13 @@ Interrupted frame decoding cannot resume; keep the partial output and start a
 fresh output directory. Processing resumes once a complete frame manifest exists.
 
 `reanchor_field_recovery` corrects slow image-registration drift around a fixed
-single-chart parent map; it does not yet accept the original three-chart v7 map.
+parent map, including the original three-chart v7 model. It selects the measured
+midfield reference when available and composes its saved reference transform;
+that transform need not be identity. All chart/blend/boundary parameters persist.
+For v7, missing charts or boundary fits prevent supported status. Existing far
+and near temporal models cannot support frames outside their fitted time domains;
+carrying an endpoint offset does not establish new boundary evidence. This CLI
+does not refit a temporal boundary for an extension.
 It requires `--atlas`, `--frames` (parent manifest), `--propagation`
 (completed raw run without paint lock), `--extension-frames`, `--split`, `--plan`,
 `--direction` and a fresh `--out` directory. Use `--turf-profile green_v1` for

@@ -31,7 +31,7 @@ qualified. Full-game accuracy, physical metric accuracy and production runtime
 remain unverified. All four reserved evaluation windows remain closed; their
 exact plan is `data/development-plan.json`.
 
-Next: restore the successful v7 method as the explicit development baseline;
+Next: finish the fresh successful-v7-method development baseline;
 the newer single-reference extension experiment is a different model, not a
 qualification of the original three-chart v7 setup. See the setup audit below
 before continuing the saved re-anchoring experiment.
@@ -41,9 +41,52 @@ Tracking, identity and analytics remain outside current scope.
 Handoff order: read `AGENTS.md`, this status, `README.md`, then
 `calibration/skills/assisted-field-recovery/SKILL.md`. The repository skill carries
 the complete frame-markup/v7 recipe without requiring the workstation's personal
-skill registrations. Updating that recipe has not adapted the extension runner
-or qualified the four minute-long sequences. Older results below retain their
+skill registrations. The extension runner now accepts three-chart maps, but this
+has not qualified the four minute-long sequences. Older results below retain their
 dated implementation and model scope; they are not the latest v7 acceptance state.
+
+## Three-chart extension compatibility — 2026-09-10
+
+The re-anchoring runner now accepts the fixed v7 multi-chart atlas. It uses the
+measured midfield view when available, preserving its possibly non-identity
+reference-to-native transform and every chart, blend, support and boundary
+parameter. The existing 0.75-second smoother and 12-native-pixel correction cap
+remain in effect; parent joins and artifacts stay immutable.
+
+Support now explicitly fails for missing v7 charts/boundary fits or frames outside
+the far/near temporal model's fitted time domain. Carrying a boundary endpoint
+offset into an extension is still diagnostic only. This change does **not** fit
+new extension boundary paint or establish a fresh v7 accuracy result.
+
+All 11 focused re-anchoring checks passed in 45.55 seconds, including forward and
+backward three-chart resume equivalence, a non-identity gauge, unchanged fixed
+models/joins and rejection outside boundary time support. All 198 Python regression
+tests passed in 109.08 seconds; CLI help, compilation, skill validation and
+whitespace checks also passed. Logs: `out/v7-control-20260910/regression-three-chart.log`.
+
+Source-only acquisition is underway because the existing opposite-half windows
+mostly show the left end and midfield. Additional fitting-only views were decoded
+in guarded intervals, without replacing any qualification window: Granite
+2390.004–2570.004 s and Butte 1070–1400 s, at one-second fitting cadence. Their
+source files were rehashed, PTS/time bases retained, and all four reserved windows
+remain closed. Granite's new views show a usable right end around 2500 s;
+Butte's right-end acquisition is not yet complete. No acquired view is independent
+check evidence. Private declarations, exact frames and source surveys are under
+`out/v7-control-20260910/`.
+
+The saved single-reference polynomial comparison is also being rerun with the
+source-time-aware runner, separately from v7. These jobs have no acceptance claim;
+the old scores below are retained until the complete updated comparison and
+receipts exist. No owner revision or editor baseline has changed.
+
+Remaining: complete the fresh source-reviewed v7 chart/boundary fit; evaluate the
+same four windows; finish transition-neighbor evidence, full-sequence comparison
+review and hash-bound qualification receipts. No window is qualified yet.
+
+The owner now permits a better alternative when supported by comparative
+evidence. Keep v7 as the benchmark; a method change must improve the same frozen
+accuracy/coverage checks, with explicit model scope and unchanged thresholds.
+The owner also authorized ongoing GitHub milestone updates for an external audit.
 
 ## Original v7 setup comparison — 2026-09-10
 
@@ -94,8 +137,8 @@ The minute-extension parents instead use `polynomial_reference_residual_v1`:
 one chart with a shared degree-3 polynomial for Granite and degree-2 for Butte,
 with no separate spatial or temporal far-boundary model. They come from later
 opposite-half development work, not the original preview. In addition,
-`reanchor_field_recovery.run` explicitly requires exactly one chart, so it cannot
-currently extend the original three-chart v7 setup. Its 12 px bounded correction
+the audited `reanchor_field_recovery.run` required exactly one chart, so that
+version could not extend the original three-chart v7 setup. Its 12 px bounded correction
 experiment must not be described as the same configuration or as proof that the
 original v7 method fails. The generic v7 fitter and boundary-refinement helpers
 are already present; no replacement solver is needed merely to recover them.

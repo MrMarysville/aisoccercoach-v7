@@ -23,12 +23,15 @@ reviews the measurements before fitting. Keep independent check paint separate.
 
 Inspect each candidate's actual mode, charts, boundary models and time support.
 `fit_field_propagation` produces the different `polynomial_reference_residual_v1`
-model. The current `reanchor_field_recovery` runner accepts only one chart, and
-the raw propagator carries an endpoint boundary offset rather than fitting v7's
-temporal boundary. These are separate experiments, not the default v7 path.
-Do not silently switch to them or remove a one-chart guard without fixing its
-gauge and transform assumptions. Preserve explicit alternative candidates for
-comparison; their failures do not establish that original v7 fails.
+model. `reanchor_field_recovery` now preserves three-chart maps and selects the
+measured midfield view as its image gauge when available, composing its saved
+transform rather than assuming identity. It rejects missing v7 charts/boundary
+fits and frames outside far/near boundary time support. The raw propagator still
+carries an endpoint boundary offset; neither propagation nor re-anchoring fits
+fresh v7 temporal boundary evidence. Reacquire and fit that evidence using the
+v7 boundary workflow before claiming extension support. Preserve explicit
+alternative candidates for comparison; their failures do not establish that
+original v7 fails.
 
 ## Inputs and source selection
 

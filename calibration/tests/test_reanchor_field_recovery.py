@@ -78,11 +78,26 @@ def freeze(path, schema, payload):
     return path
 
 
-def prepare_run(tmp_path, monkeypatch, *, resumed=False):
+def prepare_run(tmp_path, monkeypatch, *, resumed=False, v7=False):
     args = inputs(tmp_path)
     document = json.loads((tmp_path / "atlas.json").read_text())
     document["payload"]["charts"][0]["reference_frame_index"] = 0
     document["payload"]["frames"][0]["warnings"] = []
+    if v7:
+        payload = document["payload"]
+        payload["projection_mode"] = r.V7_PROJECTION_MODE
+        chart = payload["charts"][0]
+        payload["charts"] = [dict(deepcopy(chart), chart=name,
+            support_world_polygon=[[-r.HALF_L, -r.HALF_W], [r.HALF_L, -r.HALF_W],
+                                   [r.HALF_L, r.HALF_W], [-r.HALF_L, r.HALF_W]])
+            for name in ("left", "mid", "right")]
+        payload["spatial_boundary"] = dict(coefficients=[90 - 2*r.HALF_W + .2, 0., 0.],
+                                           x_origin_px=160., x_scale_px=320.)
+        payload["temporal_boundary"] = r.fit_temporal_boundary([
+            dict(frame_index=i, time_s=4. + i*.5, median_offset_px=.4, samples=100, mad_px=0.)
+            for i in range(5)], range(5))
+        payload["frames"][0]["boundary_offset_native_y_px"] = .4
+        payload["frames"][0]["reference_to_native"] = [[1.02, .02, 7], [.01, .98, 2], [.0001, .0002, 1]]
     document["payload_sha256"] = r.digest(document["payload"])
     (tmp_path / "atlas.json").write_text(json.dumps(document))
     monkeypatch.setattr(r, "adjacent_motion", lambda *a: (translation(1), dict(image_registration_pass=True)))
@@ -113,12 +128,13 @@ def run_reanchor(tmp_path, raw, direction, output, references=None):
 
 
 @pytest.mark.parametrize("direction", ["forward", "backward"])
-def test_resumed_and_uninterrupted_reanchor_equivalent_with_immutable_parent(tmp_path, monkeypatch, direction):
+@pytest.mark.parametrize("v7", [False, True])
+def test_resumed_and_uninterrupted_reanchor_equivalent_with_immutable_parent(tmp_path, monkeypatch, direction, v7):
     roots = [tmp_path / name for name in ("full", "resumed")]
     outputs = []
     for root, resume in zip(roots, (False, True)):
         root.mkdir()
-        raw = prepare_run(root, monkeypatch, resumed=resume)
+        raw = prepare_run(root, monkeypatch, resumed=resume, v7=v7)
         parents = {p: (p.read_bytes(), p.stat().st_mtime_ns) for p in [root / "atlas.json", *raw.glob("progress-*/*.json")]}
         report = run_reanchor(root, raw, direction, root / "reanchored")
         assert report["boundary_mapping_unchanged"] and report["frame_count"] == 3
@@ -129,6 +145,13 @@ def test_resumed_and_uninterrupted_reanchor_equivalent_with_immutable_parent(tmp
         assert atlas.payload["provenance"]["parent_provenance"]["fit_frame_indices"] == [0]
         assert len(atlas.payload["provenance"]["fitting_frames"]) == 3
         connections = json.loads((root / "reanchored/reference-connections.json").read_text())
+        parent = r.RecoveryAtlas.load(root / "atlas.json")
+        assert {k: v for k, v in atlas.payload.items() if k not in ("frames", "provenance")} == {
+            k: v for k, v in parent.payload.items() if k not in ("frames", "provenance")}
+        if v7:
+            assert connections["gauge"]["chart"] == "mid" and len(atlas.charts) == 3
+            assert all(row["boundary_offset_native_y_px"] == .4 for row in atlas.payload["frames"])
+            assert report["supported_frames"] == 3
         gauge = next(v for v in connections["views"] if v["manifest"] == "parent")
         for view in connections["views"]:
             assert view["connection_id"] == round((reanchor.identity(view) - reanchor.identity(gauge)) * 1_000_000_000)
@@ -143,6 +166,26 @@ def test_resumed_and_uninterrupted_reanchor_equivalent_with_immutable_parent(tmp
         with pytest.raises(ValueError, match="checkpoint"):
             run_reanchor(root, raw, direction, root / "changed")
     assert outputs[0] == outputs[1]
+
+
+def test_v7_boundary_time_support_and_missing_charts_cannot_claim_support(tmp_path, monkeypatch):
+    prepare_run(tmp_path, monkeypatch, v7=True)
+    parent = r.RecoveryAtlas.load(tmp_path / "atlas.json")
+    grid = np.array([[x, y] for x in (-30., 0., 30.) for y in (-25., 0., 25.)])
+    records = [dict(deepcopy(parent.payload["frames"][0]), index=i, source_pts=5000 + 1000*i)
+               for i in range(3)]
+    transforms = [r.matrix(row["reference_to_native"]) for row in records]
+    corrected, statuses, _ = reanchor.bounded_correction(parent, records, transforms, [5., 6., 7.], 0, grid)
+    assert corrected[0] == records[0]
+    assert "outside_temporal_boundary_fit_support" in statuses[2]["reasons"]
+    assert not statuses[2]["supported"] and corrected[2]["reference_to_native"] == records[2]["reference_to_native"]
+    partial = deepcopy(parent.payload)
+    partial["charts"].pop()
+    partial["temporal_boundary"] = None
+    _, statuses, _ = reanchor.bounded_correction(r.RecoveryAtlas.from_payload(partial), records, transforms,
+                                                [5., 6., 7.], 0, grid)
+    assert all(not row["supported"] for row in statuses)
+    assert {"incomplete_v7_spatial_charts", "missing_v7_boundary_fit"} <= set(statuses[0]["reasons"])
 
 
 def test_check_plan_keeps_missing_portions_ambiguous_groups_and_missing_maps(tmp_path):

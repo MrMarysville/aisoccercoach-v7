@@ -143,6 +143,15 @@ def bounded_correction(atlas, records, observations, times, boundary_index, grid
         bracket = bool(before and after and times[after[0]] - times[before[-1]] <= 1.1)
         bounds = correction_bounds(atlas, record, transform, grid)
         reasons = []
+        if atlas.projection_mode == recovery.V7_PROJECTION_MODE:
+            if {c["chart"] for c in atlas.charts} != {"left", "mid", "right"}:
+                reasons.append("incomplete_v7_spatial_charts")
+            if atlas.payload.get("spatial_boundary") is None or atlas.payload.get("temporal_boundary") is None:
+                reasons.append("missing_v7_boundary_fit")
+        for name in ("temporal_boundary", "near_temporal_boundary"):
+            model = atlas.payload.get(name)
+            if model is not None and not model["domain_s"][0] <= times[i] <= model["domain_s"][1]:
+                reasons.append(f"outside_{name}_fit_support")
         if i in drift["unsupported_indices"] or not bracket:
             reasons.append("missing_temporal_registration_support")
         if not bounds["valid"]:
@@ -199,8 +208,6 @@ def run(atlas_path, frames_path, propagation_path, extension_path, split_path, p
         inputs.append(Path(references_path))
     hashes = {str(p.resolve()): sha256_file(p) for p in inputs}
     parent = recovery.RecoveryAtlas.load(atlas_path)
-    if len(parent.charts) != 1:
-        raise ValueError("Re-anchoring needs an existing single reference field model")
     manifest, extension = [json.loads(p.read_text()) for p in (frames_path, extension_path)]
     plan = load_plan(plan_path, catalog_path)
     game = next(g for g in plan["payload"]["games"] if g["game_id"] == parent.payload["source"]["game_id"])
@@ -271,7 +278,11 @@ def run(atlas_path, frames_path, propagation_path, extension_path, split_path, p
         max_displacement_native_px=12., maximum_connection_bridges=1, maximum_observation_gap_s=1.1,
         transform_direction="reference pixels to current native pixels", metric_certified=False), exclusive=True)
     cv2.setNumThreads(4)
-    gauge_row = next(r for r in parent_rows if r["index"] == parent.charts[0]["reference_frame_index"])
+    # Every chart is already expressed in the atlas's shared reference plane.
+    # Use the measured midfield view when available; its saved transform need
+    # not be identity, so compose it after each gauge-to-image registration.
+    gauge_chart = next((c for c in parent.charts if c["chart"] == "mid"), parent.charts[0])
+    gauge_row = next(r for r in parent_rows if r["index"] == gauge_chart["reference_frame_index"])
     gauge_transform = recovery.matrix(parent.frames[identity(gauge_row)]["reference_to_native"])
     # The reused helpers rank nearest anchors by ID distance. Use source-time
     # offsets so backward order and the gap to the parent gauge stay meaningful.
@@ -328,6 +339,8 @@ def run(atlas_path, frames_path, propagation_path, extension_path, split_path, p
         reference_paint_checks=checked_refs, correction_paths=drift_paths, correction_attempts=drift_attempts,
         transforms={i: h.tolist() for i, h in connected.items()},
         observation_role="fitting evidence, never independent accuracy checks")
+    connections["gauge"] = dict(chart=gauge_chart["chart"], frame_index=gauge_row["index"],
+                               reference_to_native=gauge_transform.tolist())
     atomic_json(output / "reference-connections.json", connections, exclusive=True)
     boundary_row = parent_rows[-1] if direction == "forward" else parent_rows[0]
     boundary_record = parent.frames[identity(boundary_row)]
