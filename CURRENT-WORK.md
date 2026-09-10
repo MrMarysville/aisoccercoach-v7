@@ -52,6 +52,29 @@ dated implementation and model scope; they are not the latest v7 acceptance stat
 
 ## Calibration code verification — 2026-09-10
 
+Latest follow-up: a package preflight now reads installed distribution names and
+versions from `requirements.txt` and rejects changed pins or conflicting OpenCV
+wheels before experiment output creation. The regression check passes. Both
+private setup scripts now use it; their prior versions and the interrupted setup
+remain preserved. The earlier error was querying `opencv-python` metadata when
+the installed wheel was `opencv-python-headless`, not a failed OpenCV import.
+OpenCV 5's published features were reviewed; no upgrade was made and no numerical
+improvement is claimed. See the dependency decision in `README.md`.
+
+Since the code milestone below, Granite's right-end and six temporal far-boundary
+views have completed actual browser-pointer markup and native-paint semantic
+review. A fresh three-chart fit processed 1,611 frames in **488.221 seconds**, with
+265 fitting frames and 1,346 check frames retained by exact source identity.
+The initial map has warnings on all frames, including a midfield training-feature
+p95 of **7.837 px**, and only **16/1,611** sampled geometry checks pass. Its temporal
+far-boundary fit is absent. The prescribed boundary refinement is running before
+independent scoring; these training diagnostics are not a qualification result.
+Inputs, complete helper freeze, measurements and outputs are private under
+`out/v7-control-20260910/granite-control/`. Butte's missing right view was found at
+1470 seconds in a guarded fitting-only acquisition; source markup/review is underway.
+All four reserved windows remain closed. The owner also requested a fresh
+independent audit of implementation, evidence and possible better approaches.
+
 Finished the code-review/test milestone before resuming footage experiments.
 Two owner-requested parallel agents reviewed isolated worktrees; the primary
 agent reviewed and integrated their fixes and ran all checks in the active checkout.

@@ -26,6 +26,11 @@ worktrees are preserved history, not additional active apps.
   at each milestone. Do not copy historical status documents into this project.
 - Use pnpm for JavaScript and `.venv/bin/python` for Python. Run relevant checks
   from `README.md`; inspect failures instead of weakening tests or gates.
+- Before creating experiment outputs, run `calibration.tools.check_environment`
+  with the project interpreter. Freeze `pinned_packages()` from that helper;
+  distribution names come from `requirements.txt`, not import names. OpenCV is
+  `opencv-python-headless`, imported as `cv2`; never install a second cv2 wheel
+  or change a running experiment's environment.
 - For Next.js route, rendering or config changes, read the relevant guide under
   `web/node_modules/next/dist/docs/` before editing. Its conventions may differ
   from earlier releases.

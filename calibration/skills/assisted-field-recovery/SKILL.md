@@ -174,6 +174,10 @@ Boundary-only revisions must preserve the parent's source-bound fit/check roles.
 Freeze recipe/helper/input hashes and copies of the exact helper files in the
 new attempt directory before fitting. Preserve the old files before changing
 code for a subsequent attempt.
+Run `.venv/bin/python -m calibration.tools.check_environment` before creating
+outputs. Use its `pinned_packages()` helper for receipt versions, deriving the
+distribution names from `requirements.txt`; OpenCV's distribution is
+`opencv-python-headless`, while its import is `cv2`.
 
 ```bash
 .venv/bin/python -m calibration.tools.fit_field_recovery --frames ALL_FRAMES_JSON --measurements REVIEWED_MEASUREMENTS_JSON --out NEW_CANDIDATE_DIR --skip-render

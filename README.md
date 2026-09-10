@@ -32,6 +32,7 @@ Requirements: Node.js 22+, pnpm 10.28.2, Python 3.11 or 3.12, and local
 ```bash
 python3 -m venv .venv
 .venv/bin/python -m pip install -r requirements.txt
+.venv/bin/python -m calibration.tools.check_environment
 pnpm install --frozen-lockfile
 pnpm dev
 ```
@@ -39,6 +40,13 @@ pnpm dev
 Dependencies must be installed once. The running app uses local files, including
 fonts bundled by Next.js at build time; it has no cloud API or account requirement.
 A fresh build fetches the selected Google Fonts when they are not cached.
+
+OpenCV's installed distribution is `opencv-python-headless==4.10.0.84`; its
+Python import is `cv2`. Run the environment check before creating experiment
+outputs and use its `pinned_packages()` result in environment receipts. It reads
+distribution names from `requirements.txt`, rejects changed versions and detects
+conflicting OpenCV wheels. Do not install `opencv-python` alongside the headless
+wheel; both provide `cv2`.
 
 ## What lives here
 
@@ -193,6 +201,7 @@ pnpm typecheck
 pnpm lint
 pnpm build
 pnpm test:python
+.venv/bin/python -m calibration.tools.check_environment
 .venv/bin/python -m compileall -q calibration
 git diff --check
 ```
@@ -205,6 +214,14 @@ Keep browser screenshots and real-footage outputs out of Git.
 No model weights, tracking stack or hosted services were migrated. Existing
 versions were retained for the numerical stack and Next.js/React. The JavaScript
 lockfile fixes transitive resolutions for this new repository.
+
+OpenCV 5 was reviewed on 2026-09-10. Its [official documentation](https://docs.opencv.org/5.0/index.html)
+describes faster warping, a new inference engine and changed calibration modules.
+This workflow already selects USAC/MAGSAC explicitly and does not use OpenCV DNN.
+No measured accuracy or runtime gain has been established here, so the reviewed
+4.10 environment remains pinned. Test a future upgrade in a separate environment
+against the same source inputs, paint checks, geometry and resume equivalence
+before changing the pin; never upgrade an active experiment.
 
 | Component | License |
 | --- | --- |
