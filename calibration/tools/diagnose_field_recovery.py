@@ -117,13 +117,21 @@ def diagnose(atlas_path, frames_path, score_path, output):
             raise ValueError("Frozen score/frame exact PTS/time-base mismatch")
         if frame.get("source_sha256", source_hash) != source_hash:
             raise ValueError("Frame/source hash mismatch")
-        mapping = atlas.frame(frame["source_pts"], frame["source_time_base"],
-                              source_sha256=source_hash, native_size=frame["native_size"])
         samples = original["raw_samples"]
-        if len(samples) != original["samples"] or not samples:
-            raise ValueError("Frozen raw sample count mismatch or empty group")
-        residuals = _nearest_residuals([r["native_xy"] for r in samples],
-                                       _projected_curve(mapping, original["label"], orientation_policy))
+        if len(samples) != original["samples"]:
+            raise ValueError("Frozen raw sample count mismatch")
+        residuals = []
+        if samples:
+            try:
+                mapping = atlas.frame(frame["source_pts"], frame["source_time_base"],
+                                      source_sha256=source_hash, native_size=frame["native_size"])
+            except ValueError:
+                if original.get("mapping_available") is not False:
+                    raise
+                mapping = None
+            curve = (_projected_curve(mapping, original["label"], orientation_policy)
+                     if mapping is not None else np.empty((0, 2)))
+            residuals = _nearest_residuals([r["native_xy"] for r in samples], curve)
         enriched = []
         for sample, residual in zip(samples, residuals):
             expected, actual = sample["error_px"], residual["distance_px"]

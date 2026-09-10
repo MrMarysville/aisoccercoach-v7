@@ -66,14 +66,38 @@ views have completed actual browser-pointer markup and native-paint semantic
 review. A fresh three-chart fit processed 1,611 frames in **488.221 seconds**, with
 265 fitting frames and 1,346 check frames retained by exact source identity.
 The initial map has warnings on all frames, including a midfield training-feature
-p95 of **7.837 px**, and only **16/1,611** sampled geometry checks pass. Its temporal
-far-boundary fit is absent. The prescribed boundary refinement is running before
-independent scoring; these training diagnostics are not a qualification result.
+p95 of **7.837 px**, and only **16/1,611** sampled geometry checks pass. The prescribed
+boundary refinement subsequently completed in **136.204 seconds**, fitting eight
+temporal anchors over 2240.004–2389.870667 s. It preserves the chart/motion values
+and does not remove those geometry failures.
 Inputs, complete helper freeze, measurements and outputs are private under
 `out/v7-control-20260910/granite-control/`. Butte's missing right view was found at
 1470 seconds in a guarded fitting-only acquisition; source markup/review is underway.
 All four reserved windows remain closed. The owner also requested a fresh
 independent audit of implementation, evidence and possible better approaches.
+
+Independent Granite scoring used the polynomial comparison's unchanged exact
+600-frame manifests, check plans, source measurements and `central_v1` policy:
+
+| Sequence | Fresh three-chart v7 passing groups | Polynomial passing groups | Fresh v7 valid geometry frames |
+| --- | ---: | ---: | ---: |
+| Granite forward | 119/294 | 112/294 | 0/600 |
+| Granite backward | 81/270 | 53/270 | 0/600 |
+
+The same 154 forward and 137 backward incomplete-evidence groups remain in the
+denominators. Box and halfway checks improve, but the near touchline passes
+0/28 forward and 0/27 backward groups. Every target frame retains its geometry
+and gauge-paint warnings. Neither minute qualifies. Detailed per-marking evidence:
+`out/v7-control-20260910/granite-control/independent-score-v1/summary-v2.json`.
+
+The real frozen plans exposed a diagnostic-tool bug: it rejected legitimate
+empty required groups. The diagnostic now preserves empty groups/null summaries
+and explicitly unavailable maps while retaining source/hash/count checks and
+the 1e-7 px unsigned-distance agreement gate. All **23 focused diagnostic and
+orientation tests pass**. Both real diagnostics preserve all 294/270 groups,
+including 56/54 empty groups, with **exactly 0.0 px** disagreement across
+15,607/14,501 samples. Original failed logs, scores and helper snapshots remain
+unchanged; retry helper copies/hashes are recorded separately.
 
 Finished the code-review/test milestone before resuming footage experiments.
 Two owner-requested parallel agents reviewed isolated worktrees; the primary

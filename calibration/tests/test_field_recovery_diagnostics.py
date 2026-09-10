@@ -95,6 +95,52 @@ def fixture(root, reflected=False):
 
 
 class IntegrationTests(unittest.TestCase):
+    def test_frozen_plan_keeps_empty_groups_and_missing_maps(self):
+        for missing_map in (False, True):
+            with self.subTest(missing_map=missing_map), tempfile.TemporaryDirectory() as tmp:
+                root = Path(tmp)
+                fixture(root)
+                manifest = json.loads((root / "frames.json").read_text())
+                frame = manifest["frames"][0]
+                checks = json.loads((root / "checks.json").read_text())
+                checks["frames_manifest_sha256"] = sha256_file(root / "frames.json")
+                for feature in checks["measurements"]:
+                    feature["review_status"] = "source_reviewed"
+                (root / "checks.json").write_text(json.dumps(checks))
+                plan = dict(source_sha256=manifest["source"]["sha256"],
+                    frames_manifest_sha256=checks["frames_manifest_sha256"],
+                    fit_frame_indices=[], check_frame_indices=[0], groups=[
+                        dict(frame_index=0, label=label, feature_ids=[label + "_fixture"],
+                             observation_status="visible", **{k: frame[k] for k in
+                             ("source_pts", "source_time_base", "image_sha256", "native_size")})
+                        for label in ("halfway", "touch_near", "touch_far")])
+                (root / "plan.json").write_text(json.dumps(dict(
+                    schema="field-recovery-check-plan-v1", payload=plan, payload_sha256=r.digest(plan))))
+                atlas_path = root / "atlas.json"
+                if missing_map:
+                    payload = r.RecoveryAtlas.load(atlas_path).payload
+                    payload["frames"] = []
+                    atlas_path = root / "missing-map.json"
+                    r.RecoveryAtlas.from_payload(payload).save(atlas_path)
+                score_path = root / "planned-score.json"
+                score(atlas_path, root / "frames.json", root / "checks.json", score_path,
+                      check_plan=root / "plan.json")
+                before = score_path.read_bytes()
+                diagnose(atlas_path, root / "frames.json", score_path, root / "diagnostic.json")
+                data = json.loads((root / "diagnostic.json").read_text())
+                self.assertEqual(score_path.read_bytes(), before)
+                self.assertEqual(data["marking_frame_count"], 3)
+                self.assertEqual(data["sample_count"], 10)
+                self.assertEqual(data["max_unsigned_distance_disagreement_px"], 0.)
+                empty = next(row for row in data["rows"] if row["label"] == "touch_far")
+                self.assertEqual(empty["raw_samples"], [])
+                self.assertFalse(empty["evidence_complete"])
+                self.assertFalse(empty["experiment_pixel_target_pass"])
+                self.assertIsNone(empty["signed_normal_summary"]["median_px"])
+                if missing_map:
+                    self.assertTrue(all(sample["residual_diagnostic"]["distance_px"] is None
+                                        for row in data["rows"] for sample in row["raw_samples"]))
+
     def test_saved_map_frozen_scorer_and_diagnostic_agree_without_mutation(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
